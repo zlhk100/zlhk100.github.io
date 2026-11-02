@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lei Zhou — Principal Systems Architect</title>
+<meta name="description" content="Lei Zhou: principal systems architect and technical leader for mixed-criticality virtualisation, full-stack platform security and Physical AI.">
+<meta name="author" content="Lei Zhou">
+<link rel="canonical" href="https://zlhk100.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://zlhk100.github.io/">
+<meta property="og:title" content="Lei Zhou — Principal Systems Architect & Technical Leader">
+<meta property="og:description" content="Mixed-criticality virtualisation, full-stack platform security and Physical AI. Guarantees engineered in, proven with measured evidence.">
+<meta property="og:image" content="https://zlhk100.github.io/assets/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+/* House style — shared with the hw-security-safety-isolation library */
+:root{
+  --bg:#faf7f2; --bg2:#f3ede4; --bg3:#ede5d8; --border:#d6cab8;
+  --text:#3a2e22; --text-dim:#6f604c; --text-head:#1e1610;
+  --accent:#1a6fb5; --accent2:#c0440e; --accent3:#1a7a4a; --accent4:#a05c00;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+  --max-w:760px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
+    --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
+    --accent:#6aaee6; --accent2:#ee8256; --accent3:#5cbf8a; --accent4:#e0a84a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
+  --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
+  --accent:#6aaee6; --accent2:#ee8256; --accent3:#5cbf8a; --accent4:#e0a84a;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16.5px;line-height:1.75}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--accent2);outline-offset:3px;border-radius:2px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 48px}
+@media (max-width:700px){.wrap{padding:0 16px}}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:block}
+
+/* Top bar */
+.top{border-bottom:1px solid var(--border);background:var(--bg2)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text-head);font-family:var(--serif);font-weight:700;font-size:18px}
+.brand:hover{text-decoration:none}
+.brand img{width:28px;height:28px;display:block}
+.top nav{display:flex;flex-wrap:wrap;gap:4px 22px;font-family:var(--mono);font-size:13px}
+.top nav a{color:var(--text-dim)}
+.top nav a:hover{color:var(--accent)}
+@media (max-width:700px){.top nav{gap:4px 16px;padding-bottom:10px}}
+
+/* Hero */
+.hero{background:var(--bg2);border-bottom:1px solid var(--border);padding:72px 0 56px}
+.hero h1{font-family:var(--serif);font-weight:700;font-size:clamp(40px,6.5vw,68px);line-height:1.02;letter-spacing:-.01em;color:var(--text-head);margin:16px 0 0}
+.role{font-size:clamp(17px,2vw,20px);font-weight:600;color:var(--text-head);margin:16px 0 0}
+.where{color:var(--text-dim);margin:2px 0 0}
+.thesis{font-family:var(--serif);font-weight:300;font-size:clamp(23px,3vw,32px);line-height:1.32;color:var(--text-head);max-width:30ch;margin:44px 0 0}
+.intro{font-weight:300;font-size:17px;max-width:64ch;margin:22px 0 0}
+.links{display:flex;flex-wrap:wrap;gap:10px 26px;margin:28px 0 0;padding:0;list-style:none;font-family:var(--mono);font-size:14px;font-weight:600}
+
+/* Timing figure */
+figure.trace{margin:52px 0 0;padding:0}
+.lanes{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 20px}
+.lane{display:grid;grid-template-columns:minmax(170px,230px) 1fr;align-items:center;gap:18px;padding:11px 0;border-bottom:1px dashed var(--border)}
+.lane:last-child{border-bottom:0}
+.lane span{font-family:var(--mono);font-size:12px;color:var(--text-dim);line-height:1.35}
+.lane span b{display:block;font-weight:600;font-size:12.5px}
+.crit span b{color:var(--accent2)}
+.best span b{color:var(--accent)}
+.lane svg{width:100%;height:28px;display:block;overflow:visible}
+.lane path{fill:none;stroke-width:1.75;vector-effect:non-scaling-stroke}
+.crit path{stroke:var(--accent2)}
+.best path{stroke:var(--accent)}
+figcaption{font-size:14px;font-weight:300;color:var(--text-dim);margin-top:12px;max-width:72ch}
+@media (max-width:640px){.lane{grid-template-columns:1fr;gap:4px}.lanes{padding:4px 14px}}
+@media (prefers-reduced-motion:no-preference){
+  .lane path{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw 2.6s cubic-bezier(.4,0,.2,1) .2s forwards}
+  .lane:nth-child(2) path{animation-delay:.32s}
+  .lane:nth-child(3) path{animation-delay:.44s}
+  .lane:nth-child(4) path{animation-delay:.56s}
+}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* Sections */
+section{padding:72px 0 8px;border-bottom:1px solid var(--border)}
+section:last-of-type{border-bottom:0}
+h2{font-family:var(--serif);font-weight:700;font-size:clamp(24px,2.8vw,30px);line-height:1.2;color:var(--text-head);margin:10px 0 32px}
+h3{font-family:var(--sans);font-size:17px;font-weight:600;color:var(--text-head);margin:0;line-height:1.4}
+.item{max-width:var(--max-w);margin:0 0 36px}
+.item p{margin:6px 0 0}
+.meta{font-family:var(--mono);font-size:12.5px;color:var(--text-dim);margin-top:4px;letter-spacing:.02em}
+.more{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px 22px;font-family:var(--mono);font-size:13.5px;font-weight:600}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tag{font-family:var(--mono);font-size:12px;padding:2px 9px;border-radius:3px;background:var(--bg3);border:1px solid var(--border);color:var(--text-dim)}
+
+.focus{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:56px}
+.focus .area{background:var(--bg2);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:6px;padding:22px 22px 24px}
+.focus .area:nth-child(2){border-top-color:var(--accent2)}
+.focus .area:nth-child(3){border-top-color:var(--accent3)}
+.focus p{margin:8px 0 0;font-size:15.5px}
+@media (max-width:940px){.focus{grid-template-columns:1fr}}
+
+.library{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:56px}
+.library a.entry{display:block;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:20px 22px;color:var(--text)}
+.library a.entry:hover{text-decoration:none;border-color:var(--accent)}
+.library a.entry h3{color:var(--text-head)}
+.library a.entry p{margin:6px 0 0;font-size:15px}
+.library a.entry .go{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);display:block;margin-top:10px}
+@media (max-width:760px){.library{grid-template-columns:1fr}}
+
+/* Career path */
+ol.path{list-style:none;margin:0 0 24px;padding:0;max-width:var(--max-w)}
+ol.path li{position:relative;padding:0 0 22px 30px}
+ol.path li::before{content:"";position:absolute;left:0;top:8px;width:11px;height:11px;border:2px solid var(--accent);border-radius:50%;background:var(--bg);z-index:1}
+ol.path li::after{content:"";position:absolute;left:6px;top:20px;bottom:0;width:1px;background:var(--border)}
+ol.path li:last-child::after{display:none}
+.org{font-weight:600;color:var(--text-head)}
+.title{font-family:var(--mono);font-size:13px;color:var(--text-dim);margin-left:6px}
+ol.path p{margin:2px 0 0;font-size:15.5px}
+.edu{font-size:15px;color:var(--text-dim);margin:8px 0 56px}
+
+.contact p{max-width:62ch;margin:0}
+.contact .links{margin:20px 0 64px}
+
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:28px 0;font-size:13.5px;color:var(--text-dim)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap">
+  <a class="brand" href="#top"><img src="assets/mark.svg" alt="" width="28" height="28">Lei Zhou</a>
+  <nav aria-label="Sections">
+    <a href="#work">Work</a><a href="#research">Research</a><a href="#library">Library</a><a href="#talks">Talks</a><a href="#contact">Contact</a>
+  </nav>
+</div></div>
+
+<header class="hero" id="top"><div class="wrap">
+  <span class="label">Systems architecture · Platform security · Physical AI</span>
+  <h1>Lei Zhou</h1>
+  <p class="role">Principal Systems Architect &amp; Technical Leader</p>
+  <p class="where">Toronto area, Canada</p>
+
+  <p class="thesis">Guarantees are engineered in through isolation, redundancy and independence, and proven with measured evidence, never assumed.</p>
+
+  <p class="intro">I’m a systems architect and player-coach technical leader for embedded, edge and cloud platforms where reliability, security and predictable performance are acceptance criteria, not aspirations. My path runs from industrial automation, through mobile SoC platforms at Qualcomm and platform security at AMD, BlackBerry and NXM Labs, to software-defined vehicle virtualisation, platform security and sovereign AI infrastructure at Linaro. Today I do independent open research on Physical AI and on making AI agents accountable.</p>
+
+  <ul class="links">
+    <li><a href="mailto:zlhk100@gmail.com">Email</a></li>
+    <li><a href="https://www.linkedin.com/in/leizhou">LinkedIn</a></li>
+    <li><a href="https://github.com/zlhk100">GitHub</a></li>
+    <li><a href="https://medium.com/@zlhk100">Medium</a></li>
+  </ul>
+
+  <figure class="trace">
+    <div class="lanes" role="img" aria-label="Illustration: four workloads of different criticality sharing one chip">
+      <div class="lane crit"><span><b>Instrument cluster</b>safety-relevant · periodic</span>
+        <svg viewBox="0 0 600 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 H6.0 V4 H16.0 V20 H46.0 V4 H56.0 V20 H86.0 V4 H96.0 V20 H126.0 V4 H136.0 V20 H166.0 V4 H176.0 V20 H206.0 V4 H216.0 V20 H246.0 V4 H256.0 V20 H286.0 V4 H296.0 V20 H326.0 V4 H336.0 V20 H366.0 V4 H376.0 V20 H406.0 V4 H416.0 V20 H446.0 V4 H456.0 V20 H486.0 V4 H496.0 V20 H526.0 V4 H536.0 V20 H566.0 V4 H576.0 V20 H600"/></svg></div>
+      <div class="lane crit"><span><b>Control loop</b>hard real-time</span>
+        <svg viewBox="0 0 600 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 H3.0 V4 H7.0 V20 H23.0 V4 H27.0 V20 H43.0 V4 H47.0 V20 H63.0 V4 H67.0 V20 H83.0 V4 H87.0 V20 H103.0 V4 H107.0 V20 H123.0 V4 H127.0 V20 H143.0 V4 H147.0 V20 H163.0 V4 H167.0 V20 H183.0 V4 H187.0 V20 H203.0 V4 H207.0 V20 H223.0 V4 H227.0 V20 H243.0 V4 H247.0 V20 H263.0 V4 H267.0 V20 H283.0 V4 H287.0 V20 H303.0 V4 H307.0 V20 H323.0 V4 H327.0 V20 H343.0 V4 H347.0 V20 H363.0 V4 H367.0 V20 H383.0 V4 H387.0 V20 H403.0 V4 H407.0 V20 H423.0 V4 H427.0 V20 H443.0 V4 H447.0 V20 H463.0 V4 H467.0 V20 H483.0 V4 H487.0 V20 H503.0 V4 H507.0 V20 H523.0 V4 H527.0 V20 H543.0 V4 H547.0 V20 H563.0 V4 H567.0 V20 H583.0 V4 H587.0 V20 H600"/></svg></div>
+      <div class="lane best"><span><b>Infotainment guest</b>Android Automotive</span>
+        <svg viewBox="0 0 600 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 H19.4 V4 H47.0 V20 H74.5 V4 H107.5 V20 H123.2 V4 H162.7 V20 H175.1 V4 H200.0 V20 H225.1 V4 H243.1 V20 H262.8 V4 H277.9 V20 H301.2 V4 H335.1 V20 H356.6 V4 H393.3 V20 H409.6 V4 H441.7 V20 H463.6 V4 H492.6 V20 H511.8 V4 H547.6 V20 H600"/></svg></div>
+      <div class="lane best"><span><b>AI inference</b>bursty · best-effort</span>
+        <svg viewBox="0 0 600 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 H21.6 V4 H64.6 V20 H114.2 V4 H186.5 V20 H246.3 V4 H327.4 V20 H362.4 V4 H421.7 V20 H470.1 V4 H511.2 V20 H600"/></svg></div>
+    </div>
+    <figcaption>Mixed criticality in one picture: workloads that must never miss a deadline share a chip with workloads that only need to be fast. My work is keeping them apart, and measuring that they stay apart. Illustration, not measured data.</figcaption>
+  </figure>
+</div></header>
+
+<main>
+<section id="focus"><div class="wrap">
+  <span class="label">Focus</span>
+  <h2>Where I work</h2>
+  <div class="focus">
+    <div class="area">
+      <h3>Mixed-criticality and virtualisation</h3>
+      <p>Consolidating safety-relevant and general-purpose workloads onto one SoC under a hypervisor, for software-defined vehicles and industrial systems, then proving they don’t interfere: timing analysis, interference attribution, GPU virtualisation and performance tuning across QNX, AGL, Android Automotive, Gunyah, Xen and KVM.</p>
+    </div>
+    <div class="area">
+      <h3>Full-stack platform security and confidential computing</h3>
+      <p>From hardware root of trust to the cloud: secure and measured boot, TrustZone and TEEs, attestation, device identity and key management, threat modelling and UNECE R155/R156 conformance, through to securing sovereign AI infrastructure.</p>
+    </div>
+    <div class="area">
+      <h3>Physical AI and robotics</h3>
+      <p>Bringing the same reliability and security discipline to robots: measuring how AI inference interferes with real-time control on shared silicon, and what to do about it.</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="work"><div class="wrap">
+  <span class="label">Selected work</span>
+  <h2>What I’ve built and led</h2>
+  <div class="item">
+    <h3>GPU virtualisation for a software-defined vehicle cockpit</h3>
+    <div class="meta">Linaro · tech lead and project manager</div>
+    <p>A safety-relevant instrument cluster and an Android Automotive infotainment guest sharing one Arm SoC and one GPU under a type-1 hypervisor. Led the guest graphics move to gfxstream (Vulkan, GLES via ANGLE, zero-copy rendering over VirtIO-GPU) and benchmark-led optimisation. Met the customer’s virtualisation-overhead target and reached parity with the incumbent stack.</p>
+  </div>
+  <div class="item">
+    <h3>WCET benchmark and outlier attribution for real-time Linux</h3>
+    <div class="meta">Linaro · conceived and led</div>
+    <p>An open-source framework that traces every class of latency outlier in Linux PREEMPT_RT to its root cause; 99.1% of task-switching outliers came from kernel non-preemptibility. It became Linaro’s first automotive benchmark capability and the technical foundation of its first Tier-1 automotive engagement.</p>
+    <div class="more"><a href="https://doi.org/10.5281/zenodo.20967588">Paper</a><a href="https://doi.org/10.5281/zenodo.20970757">Slides</a></div>
+  </div>
+  <div class="item">
+    <h3>Sovereign AI infrastructure and AI-native engineering</h3>
+    <div class="meta">Linaro · architect and delivery lead</div>
+    <p>Designed a provider-agnostic, three-tier sovereign LLM platform across three public clouds, owned its threat model and security controls, and personally delivered two of the regional nodes. Championed the company-wide move to AI-assisted engineering and ran a biweekly lunch-and-learn on hands-on practice.</p>
+  </div>
+  <div class="item">
+    <h3>Widevine L1 secure media for in-flight entertainment</h3>
+    <div class="meta">Linaro · team lead</div>
+    <p>Led the team enabling Widevine L1 DRM on embedded Linux for an in-flight entertainment system (secure boot, secure video pipeline), then porting it to a second manufacturer’s system through full device qualification.</p>
+  </div>
+  <div class="item">
+    <h3>TEE-hosted security control plane for IoT</h3>
+    <div class="meta">NXM Labs · Director of Firmware Security</div>
+    <p>Defined the security architecture for attestation-gated device onboarding, with the security-sensitive control plane, audit logging and access control running inside a TEE secure enclave. Took the framework through independent PSA Level 2 certification.</p>
+    <div class="more"><a href="https://medium.com/@zlhk100/use-blockchain-immutable-db-to-provide-decentralized-device-identity-at-scale-836bf5ce18e9">Design article</a></div>
+  </div>
+</div></section>
+
+<section id="research"><div class="wrap">
+  <span class="label">Open research</span>
+  <h2>Current projects</h2>
+  <div class="item">
+    <h3>MCIB: Mixed-Criticality Interference Benchmark</h3>
+    <p>An open, platform-neutral specification for attributing interference between AI inference and real-time control on shared silicon: an interference taxonomy, an attribution protocol and a results schema with mandatory provenance. The harness is validated on a Raspberry Pi 4B under PREEMPT_RT; the first measurement campaign is planned on Renesas R-Car V4H.</p>
+    <div class="tags"><span class="tag">Apache-2.0</span><span class="tag">CC BY 4.0</span><span class="tag">PREEMPT_RT</span></div>
+    <div class="more"><a href="https://github.com/zlhk100/physical-ai-mixed-criticality">GitHub repository</a></div>
+  </div>
+  <div class="item">
+    <h3>anchorstamp: attested execution evidence for AI agents</h3>
+    <p>Checks what an AI agent claims it did against what an independent observer on the platform recorded, using signed, hash-chained records. The Linux kernel-audit proof of concept detects forged claims and unreported actions across 11 live adversarial scenarios.</p>
+    <div class="tags"><span class="tag">Rust</span><span class="tag">MIT / Apache-2.0</span><span class="tag">Spec part 1 published</span></div>
+    <div class="more"><a href="https://github.com/zlhk100/anchorstamp">GitHub repository</a><a href="https://medium.com/@zlhk100/the-agent-you-cant-audit-why-agentic-ai-needs-a-hardware-root-e4187b07ba9e">The Agent You Can’t Audit</a></div>
+  </div>
+</div></section>
+
+<section id="library"><div class="wrap">
+  <span class="label">Knowledge library</span>
+  <h2>Long-form references</h2>
+  <div class="library">
+    <a class="entry" href="https://zlhk100.github.io/hw-security-safety-isolation/article/">
+      <h3>Security and Safety by Isolation</h3>
+      <p>A first-principles framework that makes TrustZone, IO-SMMU, MPAM and vendor protection mechanisms recognisable as one pattern.</p>
+      <span class="go">Read the framework</span>
+    </a>
+    <a class="entry" href="https://zlhk100.github.io/hw-security-safety-isolation/article/arm-cca-kvm-deep-dive.html">
+      <h3>Arm CCA and KVM: multiple guest OSes with RME</h3>
+      <p>How KVM and the Realm Management Monitor split authority across two security worlds.</p>
+      <span class="go">Read the deep dive</span>
+    </a>
+  </div>
+</div></section>
+
+<section id="talks"><div class="wrap">
+  <span class="label">Talks and writing</span>
+  <h2>Speaking and publications</h2>
+  <div class="item">
+    <h3>WCET outlier attribution for mixed-criticality automotive systems</h3>
+    <div class="meta">Embedded World 2026, Nuremberg · AGL All Member Meeting 2026, Tokyo</div>
+    <div class="more"><a href="https://doi.org/10.5281/zenodo.20967588">Paper</a><a href="https://doi.org/10.5281/zenodo.20970757">Slides</a></div>
+  </div>
+  <div class="item">
+    <h3>RTOS determinism, and MRAM for compact safety-system Linux</h3>
+    <div class="meta">EdgeTech+ Japan 2025 · two talks</div>
+  </div>
+  <div class="item">
+    <h3>Articles</h3>
+    <p>Real-time Linux for automotive, SPDM/IDE trust chains and confidential computing, platform security, and accountability for AI agents.</p>
+    <div class="more"><a href="https://medium.com/@zlhk100">All articles on Medium</a></div>
+  </div>
+</div></section>
+
+<section id="path"><div class="wrap">
+  <span class="label">Career path</span>
+  <h2>Where I’ve worked</h2>
+  <ol class="path">
+    <li><span class="org">Independent research</span><span class="title">Physical AI and AI-agent accountability</span><p>MCIB and anchorstamp, both open source.</p></li>
+    <li><span class="org">Linaro</span><span class="title">Principal Tech Lead</span><p>Led a distributed team of senior engineers while serving as service team manager, pre-sales solution architect, delivery director and tech lead, for automotive, aviation and industrial customers.</p></li>
+    <li><span class="org">NXM Labs</span><span class="title">Director of Firmware Security</span><p>IoT security architecture, device identity and PSA Level 2 certification.</p></li>
+    <li><span class="org">BlackBerry</span><span class="title">Senior System Security Engineer</span><p>TrustZone-based OS integrity monitoring; Android and Linux security hardening.</p></li>
+    <li><span class="org">AMD</span><span class="title">Staff Software Engineer</span><p>Secure boot, root of trust and content protection for APU and GPU platforms.</p></li>
+    <li><span class="org">Qualcomm</span><span class="title">Staff Software Engineer</span><p>Snapdragon display, multimedia and content-protection software, from kernel driver to SDK. Qualcomm SuperStar award.</p></li>
+    <li><span class="org">NARI Group</span><span class="title">System Engineering Manager</span><p>Early career in industrial automation: real-time telemetry and control for national critical infrastructure, where reliability was the acceptance criterion.</p></li>
+  </ol>
+  <p class="edu">Master of Electronic &amp; Electrical Engineering, Nanjing University of Science and Technology</p>
+</div></section>
+
+<section id="contact" class="contact"><div class="wrap">
+  <span class="label">Contact</span>
+  <h2>Get in touch</h2>
+  <p>I’m open to conversations about principal architect and technical leadership roles, in the Toronto area or remote. Email is the quickest way to reach me; my full resume is available on request.</p>
+  <ul class="links">
+    <li><a href="mailto:zlhk100@gmail.com">zlhk100@gmail.com</a></li>
+    <li><a href="https://www.linkedin.com/in/leizhou">LinkedIn</a></li>
+    <li><a href="https://github.com/zlhk100">GitHub</a></li>
+  </ul>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <span>© Lei Zhou</span>
+  <span>Written content CC BY 4.0 unless noted</span>
+</div></footer>
+
+<script>
+document.querySelectorAll('.lane path').forEach(function(p){
+  try{p.style.setProperty('--len',Math.ceil(p.getTotalLength())+'px');}catch(e){}
+});
+</script>
+</body>
+</html>
