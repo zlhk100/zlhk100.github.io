@@ -14,6 +14,8 @@
 <meta property="og:image" content="https://zlhk100.github.io/assets/og-card.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
@@ -22,7 +24,9 @@
 :root{
   --bg:#faf7f2; --bg2:#f3ede4; --bg3:#ede5d8; --border:#d6cab8;
   --text:#3a2e22; --text-dim:#6f604c; --text-head:#1e1610;
-  --accent:#1a6fb5; --accent2:#c0440e; --accent3:#1a7a4a; --accent4:#a05c00;
+  /* Brand colours from the logo: navy = deterministic, orange = AI / entropy, sky = transition */
+  --accent:#2E3192; --accent2:#B9431B; --accent3:#1F6F9E;
+  --navy:#2E3192; --orange:#F15A29; --sky:#37AFE4;
   --mono:'IBM Plex Mono',ui-monospace,monospace;
   --sans:'IBM Plex Sans',system-ui,sans-serif;
   --serif:'Fraunces',Georgia,serif;
@@ -32,20 +36,22 @@
   :root:not([data-theme="light"]){
     --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
     --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
-    --accent:#6aaee6; --accent2:#ee8256; --accent3:#5cbf8a; --accent4:#e0a84a;
+    --accent:#9EA1F0; --accent2:#F4825F; --accent3:#62C4EE;
+    --navy:#9EA1F0; --orange:#F4825F; --sky:#62C4EE;
   }
 }
 :root[data-theme="dark"]{
   --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
   --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
-  --accent:#6aaee6; --accent2:#ee8256; --accent3:#5cbf8a; --accent4:#e0a84a;
+  --accent:#9EA1F0; --accent2:#F4825F; --accent3:#62C4EE;
+    --navy:#9EA1F0; --orange:#F4825F; --sky:#62C4EE;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16.5px;line-height:1.75}
 a{color:var(--accent);text-decoration:none}
 a:hover{text-decoration:underline;text-underline-offset:3px}
-a:focus-visible{outline:2px solid var(--accent2);outline-offset:3px;border-radius:2px}
+a:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius:2px}
 .wrap{max-width:1100px;margin:0 auto;padding:0 48px}
 @media (max-width:700px){.wrap{padding:0 16px}}
 .label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:block}
@@ -55,7 +61,7 @@ a:focus-visible{outline:2px solid var(--accent2);outline-offset:3px;border-radiu
 .top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;color:var(--text-head);font-family:var(--serif);font-weight:700;font-size:18px}
 .brand:hover{text-decoration:none}
-.brand img{width:28px;height:28px;display:block}
+.brand img{width:30px;height:30px;display:block}
 .top nav{display:flex;flex-wrap:wrap;gap:4px 22px;font-family:var(--mono);font-size:13px}
 .top nav a{color:var(--text-dim)}
 .top nav a:hover{color:var(--accent)}
@@ -63,6 +69,11 @@ a:focus-visible{outline:2px solid var(--accent2);outline-offset:3px;border-radiu
 
 /* Hero */
 .hero{background:var(--bg2);border-bottom:1px solid var(--border);padding:72px 0 56px}
+.hero .wrap{position:relative}
+.hero-mark{position:absolute;right:48px;top:8px;width:280px;height:auto}
+@media (max-width:1020px){.hero-mark{display:none}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hero-mark{background:#fff;border-radius:24px;padding:22px}}
+:root[data-theme="dark"] .hero-mark{background:#fff;border-radius:24px;padding:22px}
 .hero h1{font-family:var(--serif);font-weight:700;font-size:clamp(40px,6.5vw,68px);line-height:1.02;letter-spacing:-.01em;color:var(--text-head);margin:16px 0 0}
 .role{font-size:clamp(17px,2vw,20px);font-weight:600;color:var(--text-head);margin:16px 0 0}
 .where{color:var(--text-dim);margin:2px 0 0}
@@ -77,12 +88,14 @@ figure.trace{margin:52px 0 0;padding:0}
 .lane:last-child{border-bottom:0}
 .lane span{font-family:var(--mono);font-size:12px;color:var(--text-dim);line-height:1.35}
 .lane span b{display:block;font-weight:600;font-size:12.5px}
-.crit span b{color:var(--accent2)}
-.best span b{color:var(--accent)}
+.crit span b{color:var(--accent)}
+.ivi span b{color:var(--accent3)}
+.ai span b{color:var(--accent2)}
 .lane svg{width:100%;height:28px;display:block;overflow:visible}
 .lane path{fill:none;stroke-width:1.75;vector-effect:non-scaling-stroke}
-.crit path{stroke:var(--accent2)}
-.best path{stroke:var(--accent)}
+.crit path{stroke:var(--navy)}
+.ivi path{stroke:var(--sky)}
+.ai path{stroke:var(--orange)}
 figcaption{font-size:14px;font-weight:300;color:var(--text-dim);margin-top:12px;max-width:72ch}
 @media (max-width:640px){.lane{grid-template-columns:1fr;gap:4px}.lanes{padding:4px 14px}}
 @media (prefers-reduced-motion:no-preference){
@@ -106,9 +119,9 @@ h3{font-family:var(--sans);font-size:17px;font-weight:600;color:var(--text-head)
 .tag{font-family:var(--mono);font-size:12px;padding:2px 9px;border-radius:3px;background:var(--bg3);border:1px solid var(--border);color:var(--text-dim)}
 
 .focus{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:56px}
-.focus .area{background:var(--bg2);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:6px;padding:22px 22px 24px}
-.focus .area:nth-child(2){border-top-color:var(--accent2)}
-.focus .area:nth-child(3){border-top-color:var(--accent3)}
+.focus .area{background:var(--bg2);border:1px solid var(--border);border-top:3px solid var(--navy);border-radius:6px;padding:22px 22px 24px}
+.focus .area:nth-child(2){border-top-color:var(--sky)}
+.focus .area:nth-child(3){border-top-color:var(--orange)}
 .focus p{margin:8px 0 0;font-size:15.5px}
 @media (max-width:940px){.focus{grid-template-columns:1fr}}
 
@@ -141,13 +154,14 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
 <body>
 
 <div class="top"><div class="wrap">
-  <a class="brand" href="#top"><img src="assets/mark.svg" alt="" width="28" height="28">Lei Zhou</a>
+  <a class="brand" href="#top"><img src="assets/mark.svg" alt="" width="30" height="30">Lei Zhou</a>
   <nav aria-label="Sections">
     <a href="#work">Work</a><a href="#research">Research</a><a href="#library">Library</a><a href="#talks">Talks</a><a href="#contact">Contact</a>
   </nav>
 </div></div>
 
 <header class="hero" id="top"><div class="wrap">
+  <img class="hero-mark" src="assets/logo.svg" alt="" width="280" height="280">
   <span class="label">Systems architecture · Platform security · Physical AI</span>
   <h1>Lei Zhou</h1>
   <p class="role">Principal Systems Architect &amp; Technical Leader</p>
@@ -170,9 +184,9 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
         <svg viewBox="0 0 600 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 H6.0 V4 H16.0 V20 H46.0 V4 H56.0 V20 H86.0 V4 H96.0 V20 H126.0 V4 H136.0 V20 H166.0 V4 H176.0 V20 H206.0 V4 H216.0 V20 H246.0 V4 H256.0 V20 H286.0 V4 H296.0 V20 H326.0 V4 H336.0 V20 H366.0 V4 H376.0 V20 H406.0 V4 H416.0 V20 H446.0 V4 H456.0 V20 H486.0 V4 H496.0 V20 H526.0 V4 H536.0 V20 H566.0 V4 H576.0 V20 H600"/></svg></div>
       <div class="lane crit"><span><b>Control loop</b>hard real-time</span>
         <svg viewBox="0 0 600 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 H3.0 V4 H7.0 V20 H23.0 V4 H27.0 V20 H43.0 V4 H47.0 V20 H63.0 V4 H67.0 V20 H83.0 V4 H87.0 V20 H103.0 V4 H107.0 V20 H123.0 V4 H127.0 V20 H143.0 V4 H147.0 V20 H163.0 V4 H167.0 V20 H183.0 V4 H187.0 V20 H203.0 V4 H207.0 V20 H223.0 V4 H227.0 V20 H243.0 V4 H247.0 V20 H263.0 V4 H267.0 V20 H283.0 V4 H287.0 V20 H303.0 V4 H307.0 V20 H323.0 V4 H327.0 V20 H343.0 V4 H347.0 V20 H363.0 V4 H367.0 V20 H383.0 V4 H387.0 V20 H403.0 V4 H407.0 V20 H423.0 V4 H427.0 V20 H443.0 V4 H447.0 V20 H463.0 V4 H467.0 V20 H483.0 V4 H487.0 V20 H503.0 V4 H507.0 V20 H523.0 V4 H527.0 V20 H543.0 V4 H547.0 V20 H563.0 V4 H567.0 V20 H583.0 V4 H587.0 V20 H600"/></svg></div>
-      <div class="lane best"><span><b>Infotainment guest</b>Android Automotive</span>
+      <div class="lane ivi"><span><b>Infotainment guest</b>Android Automotive</span>
         <svg viewBox="0 0 600 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 H19.4 V4 H47.0 V20 H74.5 V4 H107.5 V20 H123.2 V4 H162.7 V20 H175.1 V4 H200.0 V20 H225.1 V4 H243.1 V20 H262.8 V4 H277.9 V20 H301.2 V4 H335.1 V20 H356.6 V4 H393.3 V20 H409.6 V4 H441.7 V20 H463.6 V4 H492.6 V20 H511.8 V4 H547.6 V20 H600"/></svg></div>
-      <div class="lane best"><span><b>AI inference</b>bursty · best-effort</span>
+      <div class="lane ai"><span><b>AI inference</b>bursty · best-effort</span>
         <svg viewBox="0 0 600 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 H21.6 V4 H64.6 V20 H114.2 V4 H186.5 V20 H246.3 V4 H327.4 V20 H362.4 V4 H421.7 V20 H470.1 V4 H511.2 V20 H600"/></svg></div>
     </div>
     <figcaption>Mixed criticality in one picture: workloads that must never miss a deadline share a chip with workloads that only need to be fast. My work is keeping them apart, and measuring that they stay apart. Illustration, not measured data.</figcaption>
