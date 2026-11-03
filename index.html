@@ -219,7 +219,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   <div class="item">
     <h3>GPU virtualisation for a software-defined vehicle cockpit</h3>
     <div class="meta">Linaro · tech lead and project manager</div>
-    <p>A safety-relevant instrument cluster and an Android Automotive infotainment guest sharing one Arm SoC and one GPU under a type-1 hypervisor. Led the guest graphics move to gfxstream (Vulkan, GLES via ANGLE, zero-copy rendering over VirtIO-GPU) and benchmark-led optimisation. Met the customer’s virtualisation-overhead target and reached parity with the incumbent stack.</p>
+    <p>A safety-relevant instrument cluster and an Android Automotive infotainment guest sharing one Arm SoC and one GPU under a type-1 hypervisor. Led the guest graphics move to gfxstream (Vulkan, GLES via ANGLE, zero-copy rendering over VirtIO-GPU) and benchmark-led optimisation. Met the customer’s virtualisation-overhead target and reached parity with the incumbent stack, and supervised the GPU-arbitration track that keeps the instrument cluster free from interference.</p>
   </div>
   <div class="item">
     <h3>WCET benchmark and outlier attribution for real-time Linux</h3>
@@ -228,20 +228,25 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     <div class="more"><a href="https://doi.org/10.5281/zenodo.20967588">Paper</a><a href="https://doi.org/10.5281/zenodo.20970757">Slides</a></div>
   </div>
   <div class="item">
+    <h3>Security and conformance assessment of an automotive SoC BSP</h3>
+    <div class="meta">Linaro · assessment lead</div>
+    <p>Led the end-to-end assessment of an automotive SoC BSP and personally conducted the firmware vulnerability and security gap analysis: secure boot chain (integrity, authenticity, anti-rollback) and cryptographic architecture review, then a UNECE R155/R156 conformance gap analysis with a remediation roadmap.</p>
+  </div>
+  <div class="item">
+    <h3>Widevine L1 secure video playback (DRM) for in-flight entertainment systems</h3>
+    <div class="meta">Linaro · delivery director and tech lead</div>
+    <p>Led delivery of NXP’s Yocto Linux Widevine L1 DRM solution on i.MX8MQ: an OP-TEE-based secure video path with secure boot. The product passed airworthiness qualification and Widevine L1 certification, the first commercial in-flight entertainment product on NXP’s Linux solution. That delivery earned an NXP referral to a second, US manufacturer and three follow-on projects, including a Qualcomm QCS8550 BSP migration from legacy Qualcomm Linux Embedded (LE) to open-source Qualcomm Linux (meta-qcom).</p>
+  </div>
+  <div class="item">
+    <h3>IoT security platform, from requirements to certification</h3>
+    <div class="meta">NXM Labs · Director of Firmware Security</div>
+    <p>Led a team of about six engineers and consultants from requirements to a commercial design win, owning the architecture and technical design reviews. Defined the security architecture, threat model and roadmap for attestation-gated device onboarding, with the security-sensitive control plane, audit logging and access control running inside a TEE secure enclave, and took the platform through independent PSA Level 2 certification.</p>
+    <div class="more"><a href="https://medium.com/@zlhk100/use-blockchain-immutable-db-to-provide-decentralized-device-identity-at-scale-836bf5ce18e9">Design article</a></div>
+  </div>
+  <div class="item">
     <h3>Sovereign AI infrastructure and AI-native engineering</h3>
     <div class="meta">Linaro · architect and delivery lead</div>
     <p>Designed a provider-agnostic, three-tier sovereign LLM platform across three public clouds, owned its threat model and security controls, and personally delivered two of the regional nodes. Championed the company-wide move to AI-assisted engineering and ran a biweekly lunch-and-learn on hands-on practice.</p>
-  </div>
-  <div class="item">
-    <h3>Widevine L1 secure media for in-flight entertainment</h3>
-    <div class="meta">Linaro · team lead</div>
-    <p>Led the team enabling Widevine L1 DRM on embedded Linux for an in-flight entertainment system (secure boot, secure video pipeline), then porting it to a second manufacturer’s system through full device qualification.</p>
-  </div>
-  <div class="item">
-    <h3>TEE-hosted security control plane for IoT</h3>
-    <div class="meta">NXM Labs · Director of Firmware Security</div>
-    <p>Defined the security architecture for attestation-gated device onboarding, with the security-sensitive control plane, audit logging and access control running inside a TEE secure enclave. Took the framework through independent PSA Level 2 certification.</p>
-    <div class="more"><a href="https://medium.com/@zlhk100/use-blockchain-immutable-db-to-provide-decentralized-device-identity-at-scale-836bf5ce18e9">Design article</a></div>
   </div>
 </div></section>
 
@@ -294,13 +299,18 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     <div class="more"><a href="https://zlhk100.github.io/hw-security-safety-isolation/talks/2026-07-taico-toronto/Sovereign_AI_Hardware_Problem_v7.pdf">Slides</a><a href="https://github.com/zlhk100/hw-security-safety-isolation/tree/main/talks/2026-07-taico-toronto">Talk notes</a></div>
   </div>
   <div class="item">
-    <h3>RTOS determinism, and MRAM for compact safety-system Linux</h3>
-    <div class="meta">EdgeTech+ Japan 2025 · two talks</div>
+    <h3>Two talks at EdgeTech+ Japan 2025</h3>
+    <div class="meta">EdgeTech+ Japan 2025</div>
+    <p>An RTOS determinism benchmark framework; and MRAM for compact Linux on resource-constrained safety systems.</p>
   </div>
   <div class="item">
     <h3>Articles</h3>
-    <p>Real-time Linux for automotive, SPDM/IDE trust chains and confidential computing, platform security, and accountability for AI agents.</p>
-    <div class="more"><a href="https://medium.com/@zlhk100">All articles on Medium</a></div>
+    <p><a href="https://doi.org/10.5281/zenodo.20967588">Is Linux RT-PREEMPT Ready for Automotive Safety-Critical Workloads?</a> (Zenodo)<br>
+    <a href="https://medium.com/@zlhk100/what-500-000-benchmark-iterations-reveal-about-linux-rt-preempt-in-automotive-systems-8f4609dee5ae">What 500,000 Benchmark Iterations Reveal About Linux RT-PREEMPT in Automotive Systems</a> (Medium)<br>
+    <a href="https://www.linkedin.com/pulse/from-specification-silicon-spdmide-trust-chain-what-means-lei-zhou-06sye/">From Specification to Silicon: SPDM/IDE Trust Chain and Confidential Computing at Scale</a> (LinkedIn)<br>
+    <a href="https://medium.com/@zlhk100/use-blockchain-immutable-db-to-provide-decentralized-device-identity-at-scale-836bf5ce18e9">Decentralized Device Identity at Scale</a> (Medium)<br>
+    <a href="https://medium.com/@zlhk100/the-agent-you-cant-audit-why-agentic-ai-needs-a-hardware-root-e4187b07ba9e">The Agent You Can’t Audit: Why Agentic AI Needs a Hardware Root</a> (Medium)</p>
+    <div class="more"><a href="https://medium.com/@zlhk100">All articles on Medium</a><a href="https://www.linkedin.com/in/leizhou/recent-activity/articles/">Articles on LinkedIn</a></div>
   </div>
 </div></section>
 
@@ -322,7 +332,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
 <section id="contact" class="contact"><div class="wrap">
   <span class="label">Contact</span>
   <h2>Get in touch</h2>
-  <p>I’m open to conversations about principal architect and technical leadership roles, in the Toronto area or remote. Email is the quickest way to reach me; my full resume is available on request.</p>
+  <p>I’m open to conversations about principal architect and technical leadership roles, and to consulting engagements in my focus areas. I’m based in the Toronto area and open to remote, hybrid or relocation for the right role. Email is the quickest way to reach me; my full resume is available on request.</p>
   <ul class="links">
     <li><a href="mailto:zlhk100@gmail.com">zlhk100@gmail.com</a></li>
     <li><a href="https://www.linkedin.com/in/leizhou">LinkedIn</a></li>
