@@ -79,7 +79,7 @@ strong{color:var(--text-head);font-weight:600}
 .fact b{display:block;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent3);margin-bottom:4px}
 @media (max-width:640px){.facts{grid-template-columns:1fr}}
 .tm{overflow-x:auto;margin:4px 0 14px;border:1px solid var(--border);border-radius:6px}
-table{border-collapse:collapse;width:100%;min-width:560px;font-size:14.5px;line-height:1.55}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14.5px;line-height:1.55}
 th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--border)}
 th{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent3);background:var(--bg2)}
 tr:last-child td{border-bottom:0}
@@ -145,20 +145,20 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
 </section>
 
 <section>
-  <span class="label">Illustrative threat model</span>
-  <h2>Assets, threats and mitigations</h2>
-  <p>The method in brief: identify the assets and trust boundaries, map threats with STRIDE, then tie each mitigation to the certification constraints. The table is representative of that method, not the customer’s threat model.</p>
+  <span class="label">Threat model</span>
+  <h2>Threat vectors, assets and mitigations</h2>
+  <p>The method: identify the assets and trust boundaries, map each threat vector with STRIDE, then choose mitigations that also respect the certification constraints. Below is a simplified version of the project’s threat model.</p>
   <div class="tm"><table>
-    <thead><tr><th>Asset</th><th>Threat (STRIDE)</th><th>Mitigation</th></tr></thead>
+    <thead><tr><th>Threat vector</th><th>STRIDE</th><th>Asset</th><th>Mitigation in this project</th></tr></thead>
     <tbody>
-      <tr><td>Boot images and firmware</td><td>Tampering, spoofing: running unauthorised code</td><td>HAB4 secure boot chain anchored in a hardware root of trust</td></tr>
-      <tr><td>Image-signing keys</td><td>Information disclosure: a signing key leaks</td><td>Two tiers of image signing and boot-authentication keys, so keys can be revoked without exposing device root keys</td></tr>
-      <tr><td>Content keys and decrypted video</td><td>Information disclosure: content theft</td><td>OP-TEE with secure buffers and a hardware-protected video path to the display</td></tr>
-      <tr><td>Device secrets and credentials</td><td>Spoofing: device cloning</td><td>Secure provisioning; secure storage and cryptographic services in the TEE</td></tr>
-      <tr><td>Mutable boot code over a ten-year life</td><td>Elevation of privilege through unpatched vulnerabilities</td><td>Minimal immutable code; the rest of the boot chain stays updatable without a P/N recertification</td></tr>
+      <tr><td>Unauthorised software injection: firmware, kernel, rootfs or system configuration</td><td>Spoofing, tampering</td><td>Firmware binaries and metadata</td><td>Secure boot: HAB4 chain of trust from the hardware root of trust, with code authentication; two-tier signing keys so keys can be revoked</td></tr>
+      <tr><td>Device counterfeiting and cloning</td><td>Spoofing</td><td>Device identity (hardware and firmware)</td><td>Immutable silicon root of trust; secure provisioning</td></tr>
+      <tr><td>Zero-day or REE-based remote and local attacks</td><td>Denial of service, elevation of privilege</td><td>Sensitive operations (DRM, key handling)</td><td>Security by isolation: OP-TEE with hardware-enforced secure buffers</td></tr>
+      <tr><td>Secret or credential extraction; content and IP leakage</td><td>Information disclosure</td><td>Key store, content keys, decrypted video</td><td>Defence in depth: TEE secure storage; data protected at rest, in transit and in use, through to a hardware-protected video path</td></tr>
+      <tr><td>Run-time tampering; software not patched against public CVEs</td><td>Tampering</td><td>Kernel and firmware code and read-only sections; mutable boot code</td><td>Minimal immutable code; secure update of the mutable boot chain over a ten-year life without P/N recertification</td></tr>
     </tbody>
   </table></div>
-  <p class="note">Built from public material only: Linaro’s published case study and my Linaro Connect 2023 talk.</p>
+  <p class="note">A simplified version of the project’s threat model, as presented in my <a href="../talks/2023-linaro-connect-london/LHR23-111_Build_Security_Privacy_Compliant_Embedded_System.pdf">Linaro Connect 2023 talk</a> (slide 9), with mitigations shown as applied in this project.</p>
 </section>
 
 <section>
