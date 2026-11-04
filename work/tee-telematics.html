@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TEE trusted services for an automotive telematics unit — Lei Zhou</title>
+<meta name="description" content="Case study: hardened TLS, secure storage and secure logging in OP-TEE for a 5G automotive telematics control unit, toward UN R155 and ISO/SAE 21434 compliance.">
+<meta name="author" content="Lei Zhou">
+<link rel="canonical" href="https://zlhk100.github.io/work/tee-telematics.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://zlhk100.github.io/work/tee-telematics.html">
+<meta property="og:title" content="TEE trusted services for an automotive telematics unit — case study">
+<meta property="og:description" content="Hardened TLS, secure storage and secure logging in OP-TEE, toward UN R155 and ISO/SAE 21434 compliance.">
+<meta property="og:image" content="https://zlhk100.github.io/assets/og-card.png">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf7f2; --bg2:#f3ede4; --bg3:#ede5d8; --border:#d6cab8;
+  --text:#3a2e22; --text-dim:#6f604c; --text-head:#1e1610;
+  --accent:#2E3192; --accent2:#B9431B; --accent3:#1F6F9E;
+  --navy:#2E3192; --orange:#F15A29; --sky:#37AFE4;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
+    --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
+    --accent:#9EA1F0; --accent2:#F4825F; --accent3:#62C4EE;
+    --navy:#9EA1F0; --orange:#F4825F; --sky:#62C4EE;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
+  --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
+  --accent:#9EA1F0; --accent2:#F4825F; --accent3:#62C4EE;
+  --navy:#9EA1F0; --orange:#F4825F; --sky:#62C4EE;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16.5px;line-height:1.75}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius:2px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 48px}
+@media (max-width:700px){.wrap{padding:0 16px}}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:block}
+.top{border-bottom:1px solid var(--border);background:var(--bg2)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text-head);font-family:var(--serif);font-weight:700;font-size:18px}
+.brand:hover{text-decoration:none}
+.brand img{width:30px;height:30px;display:block}
+.top nav{display:flex;flex-wrap:wrap;gap:4px 22px;font-family:var(--mono);font-size:13px}
+.top nav a{color:var(--text-dim)}
+.top nav a:hover{color:var(--accent)}
+.hero{background:var(--bg2);border-bottom:1px solid var(--border);padding:56px 0 44px}
+.hero h1{font-family:var(--serif);font-weight:700;font-size:clamp(30px,4.6vw,46px);line-height:1.12;color:var(--text-head);margin:14px 0 0;max-width:24ch}
+.sub{font-size:clamp(17px,2vw,19px);font-weight:300;color:var(--text-head);margin:14px 0 0;max-width:60ch}
+.meta{font-family:var(--mono);font-size:12.5px;color:var(--text-dim);margin-top:14px;letter-spacing:.02em}
+article{max-width:760px;padding:24px 0 40px}
+article section{padding:28px 0 4px;border-bottom:1px solid var(--border)}
+article section:last-of-type{border-bottom:0}
+h2{font-family:var(--serif);font-weight:700;font-size:clamp(22px,2.6vw,27px);line-height:1.25;color:var(--text-head);margin:6px 0 14px}
+article p{margin:0 0 14px}
+article ul{margin:0 0 18px;padding-left:22px}
+article li{margin:0 0 8px}
+article li::marker{color:var(--accent)}
+strong{color:var(--text-head);font-weight:600}
+.callout{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--navy);border-radius:6px;padding:16px 20px;margin:4px 0 20px}
+.callout p{margin:0}
+.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:4px 0 22px}
+.fact{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:15px}
+.fact b{display:block;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent3);margin-bottom:4px}
+@media (max-width:640px){.facts{grid-template-columns:1fr}}
+.tm{overflow-x:auto;margin:4px 0 14px;border:1px solid var(--border);border-radius:6px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14.5px;line-height:1.55}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--border)}
+th{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent3);background:var(--bg2)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600;color:var(--text-head)}
+.more{margin:6px 0 18px;display:flex;flex-wrap:wrap;gap:6px 22px;font-family:var(--mono);font-size:13.5px;font-weight:600}
+.note{font-size:14px;color:var(--text-dim)}
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:28px 0;font-size:13.5px;color:var(--text-dim)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap">
+  <a class="brand" href="../"><img src="../assets/mark.svg" alt="" width="30" height="30">Lei Zhou</a>
+  <nav aria-label="Site">
+    <a href="../#work">Work</a><a href="../#research">Research</a><a href="../#talks">Talks</a><a href="../#contact">Contact</a>
+  </nav>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <span class="label">Case study · Platform security</span>
+  <h1>TEE trusted services for an automotive telematics unit</h1>
+  <p class="sub">Hardened TLS, secure storage and secure logging in OP-TEE for a 5G telematics control unit, toward UN R155 and ISO/SAE 21434 compliance.</p>
+  <div class="meta">Linaro · delivery lead</div>
+</div></header>
+
+<main><div class="wrap"><article>
+
+<section>
+  <span class="label">Context</span>
+  <h2>A connected vehicle unit on the regulated side of the line</h2>
+  <p>The target was an automotive telematics control unit (TCU) built on the MediaTek MT2735 (quad-core Cortex-A55), connecting the vehicle over 5G and enabling V2X communication. Its secrets and data include TLS credentials, the vehicle’s electronic identity, configuration and security parameters, and owner privacy data.</p>
+</section>
+
+<section>
+  <span class="label">The challenge</span>
+  <h2>Compliance has to be engineered, not declared</h2>
+  <p>Vehicles sold in UNECE markets must meet <strong>UN R155</strong> (cybersecurity) and <strong>UN R156</strong> (software updates); <strong>ISO/SAE 21434</strong> (cybersecurity engineering) is highly recommended for meeting R155. EU research work such as <strong>EVITA</strong> provides a reference architecture for automotive hardware security.</p>
+  <p>R155’s threat catalogue (Annex 5, Part A) names the threats that mattered most for a TCU:</p>
+  <ul>
+    <li><strong>4.3.2, threats to communication channels:</strong> message spoofing, Sybil attacks, man-in-the-middle and replay.</li>
+    <li><strong>4.3.6, threats to vehicle data and code:</strong> extraction or manipulation of data such as the vehicle’s electronic ID or owner data; unauthorised access to diagnostic or driving parameters and configuration; key extraction; leakage of confidential IP; malicious code.</li>
+  </ul>
+  <p>Off-the-shelf OpenSSL kept TLS keys and cryptographic operations in the rich operating system, which did not match the security model the threat analysis required.</p>
+</section>
+
+<section>
+  <span class="label">My role</span>
+  <h2>What I did, and what my team did</h2>
+  <p>I led the delivery. I defined the threat model and security architecture jointly with the customer, working from the R155 requirements. My team built the SDK under my lead; the cryptographic SDK APIs were split across the team, and I implemented part of them myself.</p>
+</section>
+
+<section>
+  <span class="label">The approach</span>
+  <h2>Threat model first, hardware security wherever possible</h2>
+  <p>Hardening started from the threat model: trust boundaries, assets, and the security properties each asset needs at rest, in transit and in use. The design principle was to prefer hardware-based security wherever the platform offers it:</p>
+  <ul>
+    <li>a hardware-assisted Trusted Execution Environment for defence in depth and security by isolation, hosting sensitive operations and key management;</li>
+    <li>a side-channel-resistant hardware crypto engine behind the crypto library;</li>
+    <li>replay-protected (RPMB) or TPM-based storage for secrets and keys;</li>
+    <li>a hardware firewall protecting memory and peripherals across trust boundaries.</li>
+  </ul>
+  <p>OP-TEE was the foundation: designed around these principles, configurable, and portable across platforms. We extended it with three trusted services.</p>
+</section>
+
+<section>
+  <span class="label">What we built</span>
+  <h2>Three trusted services in OP-TEE</h2>
+  <ul>
+    <li><strong>Hardened TLS with mutual authentication.</strong> All sensitive operations behind TLS moved into an OP-TEE trusted application (TA), exposed to OpenSSL through its provider interface: key generation, import and key derivation; symmetric and asymmetric ciphers; signing and verification; key exchange; and key and secure-store management. Private and session keys never leave the TEE.</li>
+    <li><strong>Secure storage with access control.</strong> A secure-storage TA exposed to the rich environment through SDK APIs to import, export, delete, move and look up data objects. It holds data provisioned in production, such as the VIN and part numbers, and security-critical parameters including passwords and device identity. Stored data is cryptographically bound to the individual device.</li>
+    <li><strong>Access control and secure logging.</strong> Access to the trusted services is restricted to privileged client applications, using OP-TEE’s existing access-control capability, and access to the TEE from rich-environment clients is logged in a tamper-resistant way for forensics and auditing.</li>
+  </ul>
+</section>
+
+<section>
+  <span class="label">Threat model</span>
+  <h2>Threat vectors and the mitigations delivered</h2>
+  <div class="tm"><table>
+    <thead><tr><th>Threat vector</th><th>R155 ref.</th><th>Asset</th><th>Mitigation delivered</th></tr></thead>
+    <tbody>
+      <tr><td>Message spoofing, man-in-the-middle, replay on telematics and V2X links</td><td>4.3.2</td><td>Communication channels</td><td>TLS with mutual authentication; keys and crypto operations inside an OP-TEE TA via the OpenSSL provider interface</td></tr>
+      <tr><td>Key extraction</td><td>4.3.6</td><td>TLS private keys, symmetric and MAC keys</td><td>Keys generated, imported and used only inside the TEE, never exposed to the rich environment</td></tr>
+      <tr><td>Unauthorised access to or tampering with vehicle data, configuration and credentials</td><td>4.3.6</td><td>Electronic identity, VIN and part numbers, security parameters, passwords</td><td>TEE secure storage bound to the device, with access restricted to privileged client applications</td></tr>
+      <tr><td>Misuse of trusted services by unauthorised or compromised rich-environment clients</td><td>4.3.6</td><td>Trusted services and their keys</td><td>TA access control, plus tamper-resistant logging of TEE access for forensics and audit</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">The threat analysis also recommended mitigations outside this SDK’s scope, such as rate-limiting against denial of service; the table shows only what the SDK delivered.</p>
+</section>
+
+<section>
+  <span class="label">Results</span>
+  <h2>Delivered ahead of schedule</h2>
+  <div class="facts">
+    <div class="fact"><b>Delivery</b>Delivered and accepted by the customer, ahead of schedule</div>
+    <div class="fact"><b>Compliance</b>Security controls traceable to UN R155 Annex 5 threats</div>
+    <div class="fact"><b>Keys and data</b>TLS keys and secure-storage data protected by the hardware TEE</div>
+    <div class="fact"><b>Platform</b>Built on OP-TEE for the MediaTek MT2735 telematics unit</div>
+  </div>
+  <div class="more"><a href="../#work">← Back to selected work</a></div>
+</section>
+
+</article></div></main>
+
+<footer><div class="wrap">
+  <span>© Lei Zhou</span>
+  <span>Written content CC BY 4.0 unless noted</span>
+</div></footer>
+</body>
+</html>
