@@ -149,7 +149,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   <span class="label">What we built</span>
   <h2>Three trusted services in OP-TEE</h2>
   <ul>
-    <li><strong>Hardened TLS with mutual authentication.</strong> All sensitive operations behind TLS moved into an OP-TEE trusted application (TA), exposed to OpenSSL through its provider interface: key generation, import and key derivation; symmetric and asymmetric ciphers; signing and verification; key exchange; and key and secure-store management. Private and session keys never leave the TEE.</li>
+    <li><strong>Hardened TLS with mutual authentication.</strong> All sensitive operations behind TLS moved into an OP-TEE trusted application (TA), exposed to OpenSSL through its provider interface: key generation, import and key derivation; symmetric and asymmetric ciphers; signing and verification; key exchange; and key and secure-store management. Private keys never leave the TEE, and the ECDHE key exchange and TLS 1.2 key derivation run inside it too, so the pre-master and master secrets are never exposed to the rich environment.</li>
     <li><strong>Secure storage with access control.</strong> A secure-storage TA exposed to the rich environment through SDK APIs to import, export, delete, move and look up data objects. It holds data provisioned in production, such as the VIN and part numbers, and security-critical parameters including passwords and device identity. Stored data is cryptographically bound to the individual device.</li>
     <li><strong>Access control and secure logging.</strong> Access to the trusted services is restricted to privileged client applications, using OP-TEE’s existing access-control capability, and access to the TEE from rich-environment clients is logged in a tamper-resistant way for forensics and auditing.</li>
   </ul>
@@ -162,7 +162,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     <thead><tr><th>Threat vector</th><th>R155 ref.</th><th>Asset</th><th>Mitigation delivered</th></tr></thead>
     <tbody>
       <tr><td>Message spoofing, man-in-the-middle, replay on telematics and V2X links</td><td>4.3.2</td><td>Communication channels</td><td>TLS with mutual authentication; keys and crypto operations inside an OP-TEE TA via the OpenSSL provider interface</td></tr>
-      <tr><td>Key extraction</td><td>4.3.6</td><td>TLS private keys, symmetric and MAC keys</td><td>Keys generated, imported and used only inside the TEE, never exposed to the rich environment</td></tr>
+      <tr><td>Key extraction</td><td>4.3.6</td><td>TLS private keys, symmetric and MAC keys</td><td>Long-term keys generated, imported and used only inside the TEE; ECDHE key exchange and TLS 1.2 key derivation also run there, keeping handshake secrets out of the rich environment</td></tr>
       <tr><td>Unauthorised access to or tampering with vehicle data, configuration and credentials</td><td>4.3.6</td><td>Electronic identity, VIN and part numbers, security parameters, passwords</td><td>TEE secure storage bound to the device, with access restricted to privileged client applications</td></tr>
       <tr><td>Misuse of trusted services by unauthorised or compromised rich-environment clients</td><td>4.3.6</td><td>Trusted services and their keys</td><td>TA access control, plus tamper-resistant logging of TEE access for forensics and audit</td></tr>
     </tbody>
