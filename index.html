@@ -147,6 +147,12 @@ ol.path p{margin:2px 0 0;font-size:15.5px}
 .contact p{max-width:62ch;margin:0}
 .contact .links{margin:20px 0 64px}
 
+.mark{display:grid;grid-template-columns:96px 1fr;gap:28px;align-items:start;max-width:var(--max-w);margin:0 0 64px}
+.mark img{width:96px;height:96px;display:block}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mark img{background:#fff;border-radius:12px;padding:8px}}
+:root[data-theme="dark"] .mark img{background:#fff;border-radius:12px;padding:8px}
+.mark p{margin:0;font-size:15.5px}
+@media (max-width:560px){.mark{grid-template-columns:1fr;gap:14px}.mark img{width:72px;height:72px}}
 footer{background:var(--bg2);border-top:1px solid var(--border);padding:28px 0;font-size:13.5px;color:var(--text-dim)}
 footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
 </style>
@@ -356,6 +362,14 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     <li><a href="https://www.linkedin.com/in/leizhou">LinkedIn</a></li>
     <li><a href="https://github.com/zlhk100">GitHub</a></li>
   </ul>
+</div></section>
+<section id="mark" class="about-mark"><div class="wrap">
+  <span class="label">About the mark</span>
+  <h2>Non-deterministic in, predictable out</h2>
+  <div class="mark">
+    <img src="assets/logo.svg" alt="The Lei Zhou mark: orange dots converging through a sky-blue dot into a navy dot, inside a navy L-shaped frame" width="96" height="96">
+    <p>The orange dots are the non-deterministic world: physical faults, adversaries, the unknown, and now AI inference. Some of them converge through the sky-blue point, where engineering happens: isolation, diverse redundancy, independence and measurement. They resolve into the navy point, which is predictable, bounded behaviour. The rest stay scattered across the field. That is residual risk, acknowledged and managed with evidence rather than wished away. The navy L is the deterministic frame that holds it all, and the axes it is measured against.</p>
+  </div>
 </div></section>
 </main>
 
