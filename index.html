@@ -13,6 +13,19 @@
 <meta property="og:description" content="Mixed-criticality virtualisation, full-stack platform security and Physical AI. Reliability, safety and security engineered in and demonstrated with measured evidence.">
 <meta property="og:image" content="https://zlhk100.github.io/assets/og-card.png">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" type="application/atom+xml" title="Lei Zhou — updates" href="feed.xml">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"Person","@id":"https://zlhk100.github.io/#lei","name":"Lei Zhou","url":"https://zlhk100.github.io/",
+  "jobTitle":"Principal Systems Architect & Technical Leader","image":"https://zlhk100.github.io/assets/avatar.png",
+  "email":"mailto:zlhk100@gmail.com",
+  "address":{"@type":"PostalAddress","addressLocality":"Toronto","addressRegion":"ON","addressCountry":"CA"},
+  "alumniOf":{"@type":"CollegeOrUniversity","name":"Nanjing University of Science and Technology"},
+  "knowsAbout":["Mixed-criticality systems","Virtualisation","Platform security","Confidential computing","Trusted execution environments","Real-time Linux","Software-defined vehicles","Physical AI"],
+  "sameAs":["https://www.linkedin.com/in/leizhou","https://github.com/zlhk100","https://medium.com/@zlhk100","https://orcid.org/0009-0006-6999-0729"]},
+ {"@type":"WebSite","@id":"https://zlhk100.github.io/#site","url":"https://zlhk100.github.io/","name":"Lei Zhou","author":{"@id":"https://zlhk100.github.io/#lei"}}
+]}
+</script>
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
@@ -126,13 +139,13 @@ h3{font-family:var(--sans);font-size:17px;font-weight:600;color:var(--text-head)
 .focus p{margin:8px 0 0;font-size:15.5px}
 @media (max-width:940px){.focus{grid-template-columns:1fr}}
 
-.library{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:56px}
+.library{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:56px}
 .library a.entry{display:block;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:20px 22px;color:var(--text)}
 .library a.entry:hover{text-decoration:none;border-color:var(--accent)}
 .library a.entry h3{color:var(--text-head)}
 .library a.entry p{margin:6px 0 0;font-size:15px}
 .library a.entry .go{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);display:block;margin-top:10px}
-@media (max-width:760px){.library{grid-template-columns:1fr}}
+@media (max-width:940px){.library{grid-template-columns:1fr}}
 
 /* Career path */
 ol.path{list-style:none;margin:0 0 24px;padding:0;max-width:var(--max-w)}
@@ -154,6 +167,14 @@ ol.path p{margin:2px 0 0;font-size:15.5px}
 :root[data-theme="dark"] .mark img{background:#fff;border-radius:12px;padding:8px}
 .mark p{margin:0;font-size:15.5px}
 @media (max-width:560px){.mark{grid-template-columns:1fr;gap:14px}.mark img{width:72px;height:72px}}
+.now{margin:30px 0 0;max-width:660px;background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--orange);border-radius:6px;padding:12px 16px;font-size:15.5px}
+.now b{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent2);margin-right:8px}
+@media (min-width:1021px){.hero .now{max-width:min(660px,calc(100% - 340px))}}
+.help{list-style:none;margin:22px 0 0;padding:0;max-width:var(--max-w)}
+.help li{margin:0 0 14px;padding-left:16px;border-left:2px solid var(--border)}
+.help li b{color:var(--text-head);font-weight:600}
+.contact p+p{margin-top:14px}
+footer a{color:var(--text-dim);text-decoration:underline;text-underline-offset:3px}
 footer{background:var(--bg2);border-top:1px solid var(--border);padding:28px 0;font-size:13.5px;color:var(--text-dim)}
 footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
 </style>
@@ -188,6 +209,8 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     <li><a href="https://github.com/zlhk100">GitHub</a></li>
     <li><a href="https://medium.com/@zlhk100">Medium</a></li>
   </ul>
+
+  <p class="now"><b>Now · Nov 2026</b>Preparing MCIB’s first measurement campaign on Renesas R-Car V4H, and open to principal architect and technical leadership roles and consulting engagements.</p>
 
   <figure class="trace">
     <div class="lanes" role="img" aria-label="Illustration: four workloads of different criticality sharing one chip">
@@ -276,7 +299,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     <h3>MCIB: Mixed-Criticality Interference Benchmark</h3>
     <p>An open, platform-neutral specification for attributing interference between AI inference and real-time control on shared silicon: an interference taxonomy, an attribution protocol and a results schema with mandatory provenance. The harness is validated on a Raspberry Pi 4B under PREEMPT_RT; the first measurement campaign is planned on Renesas R-Car V4H.</p>
     <div class="tags"><span class="tag">Apache-2.0</span><span class="tag">CC BY 4.0</span><span class="tag">PREEMPT_RT</span></div>
-    <div class="more"><a href="https://github.com/zlhk100/physical-ai-mixed-criticality">GitHub repository</a></div>
+    <div class="more"><a href="https://github.com/zlhk100/physical-ai-mixed-criticality">GitHub repository</a><a href="library/mixed-criticality-primer.html">Background primer</a><a href="feed.xml">Follow updates</a></div>
   </div>
   <div class="item">
     <h3>anchorstamp: attested execution evidence for AI agents</h3>
@@ -290,6 +313,11 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   <span class="label">Knowledge library</span>
   <h2>Long-form references</h2>
   <div class="library">
+    <a class="entry" href="library/mixed-criticality-primer.html">
+      <h3>Mixed-criticality on shared silicon</h3>
+      <p>A primer for Physical AI: where tail latency comes from when inference and control share an SoC, why isolation must be complete, and why it is now a compliance question.</p>
+      <span class="go">Read the primer</span>
+    </a>
     <a class="entry" href="https://zlhk100.github.io/hw-security-safety-isolation/article/">
       <h3>Security and Safety by Isolation</h3>
       <p>A first-principles framework that makes TrustZone, IO-SMMU, MPAM and vendor protection mechanisms recognisable as one pattern.</p>
@@ -359,6 +387,12 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   <span class="label">Contact</span>
   <h2>Get in touch</h2>
   <p>I’m open to conversations about principal architect and technical leadership roles, and to consulting engagements in my focus areas. I’m based in the Toronto area and open to remote, hybrid or relocation for the right role. Email is the quickest way to reach me; my full resume is available on request.</p>
+  <p><strong>How I can help as a consultant:</strong></p>
+  <ul class="help">
+    <li><b>Mixed-criticality and virtualisation.</b> Consolidation architecture reviews, interference and timing characterisation on real-time Linux and hypervisor platforms, and GPU virtualisation performance.</li>
+    <li><b>Platform security.</b> Secure boot, TEE and attestation architecture, BSP security assessments, and UNECE R155/R156 conformance gap analysis.</li>
+    <li><b>Physical AI platform readiness.</b> Characterising how AI inference interferes with real-time control on your silicon, and which countermeasures fit: tuning, partitioning or a hard ceiling.</li>
+  </ul>
   <ul class="links">
     <li><a href="mailto:zlhk100@gmail.com">zlhk100@gmail.com</a></li>
     <li><a href="https://www.linkedin.com/in/leizhou">LinkedIn</a></li>
@@ -377,7 +411,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
 
 <footer><div class="wrap">
   <span>© Lei Zhou</span>
-  <span>Written content CC BY 4.0 unless noted</span>
+  <span>Written content CC BY 4.0 unless noted · cookie-free page counts via <a href="https://www.goatcounter.com/">GoatCounter</a> · <a href="feed.xml">Feed</a></span>
 </div></footer>
 
 <script>
@@ -385,5 +419,6 @@ document.querySelectorAll('.lane path').forEach(function(p){
   try{p.style.setProperty('--len',Math.ceil(p.getTotalLength())+'px');}catch(e){}
 });
 </script>
+<script data-goatcounter="https://zlhk100.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mixed-criticality on shared silicon: a primer for Physical AI — Lei Zhou</title>
+<meta name="description" content="Why AI inference and real-time control on one SoC interfere, what benchmark data shows about tail latency under PREEMPT_RT, two isolation architectures, measurement discipline, and the EU compliance dates that make it urgent.">
+<meta name="author" content="Lei Zhou">
+<link rel="canonical" href="https://zlhk100.github.io/library/mixed-criticality-primer.html">
+<link rel="alternate" type="application/atom+xml" title="Lei Zhou — updates" href="../feed.xml">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://zlhk100.github.io/library/mixed-criticality-primer.html">
+<meta property="og:title" content="Mixed-criticality on shared silicon: a primer for Physical AI">
+<meta property="og:description" content="AI inference and safety-critical control on one SoC: where the tail latency comes from, why isolation must be complete, and why it is now a compliance question.">
+<meta property="og:image" content="https://zlhk100.github.io/assets/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle",
+ "headline":"Mixed-Criticality on Shared Silicon: A Primer for Physical AI",
+ "author":{"@type":"Person","name":"Lei Zhou","url":"https://zlhk100.github.io/"},
+ "copyrightHolder":{"@type":"Organization","name":"Linaro Ltd."},"copyrightYear":2026,
+ "license":"https://creativecommons.org/licenses/by/4.0/",
+ "isBasedOn":"https://github.com/zlhk100/physical-ai-mixed-criticality/blob/main/docs/mixed-criticality-primer.md",
+ "datePublished":"2026-11-05","url":"https://zlhk100.github.io/library/mixed-criticality-primer.html"}
+</script>
+<style>
+:root{
+  --bg:#faf7f2; --bg2:#f3ede4; --bg3:#ede5d8; --border:#d6cab8;
+  --text:#3a2e22; --text-dim:#6f604c; --text-head:#1e1610;
+  --accent:#2E3192; --accent2:#B9431B; --accent3:#1F6F9E;
+  --navy:#2E3192; --orange:#F15A29; --sky:#37AFE4;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
+    --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
+    --accent:#9EA1F0; --accent2:#F4825F; --accent3:#62C4EE;
+    --navy:#9EA1F0; --orange:#F4825F; --sky:#62C4EE;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
+  --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
+  --accent:#9EA1F0; --accent2:#F4825F; --accent3:#62C4EE;
+  --navy:#9EA1F0; --orange:#F4825F; --sky:#62C4EE;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16.5px;line-height:1.75}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius:2px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 48px}
+@media (max-width:700px){.wrap{padding:0 16px}}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:block}
+.top{border-bottom:1px solid var(--border);background:var(--bg2)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text-head);font-family:var(--serif);font-weight:700;font-size:18px}
+.brand:hover{text-decoration:none}
+.brand img{width:30px;height:30px;display:block}
+.top nav{display:flex;flex-wrap:wrap;gap:4px 22px;font-family:var(--mono);font-size:13px}
+.top nav a{color:var(--text-dim)}
+.top nav a:hover{color:var(--accent)}
+.hero{background:var(--bg2);border-bottom:1px solid var(--border);padding:56px 0 44px}
+.hero h1{font-family:var(--serif);font-weight:700;font-size:clamp(30px,4.6vw,46px);line-height:1.12;color:var(--text-head);margin:14px 0 0;max-width:24ch}
+.sub{font-size:clamp(17px,2vw,19px);font-weight:300;color:var(--text-head);margin:14px 0 0;max-width:60ch}
+.meta{font-family:var(--mono);font-size:12.5px;color:var(--text-dim);margin-top:14px;letter-spacing:.02em}
+article{max-width:760px;padding:24px 0 40px}
+article section{padding:28px 0 4px;border-bottom:1px solid var(--border)}
+article section:last-of-type{border-bottom:0}
+h2{font-family:var(--serif);font-weight:700;font-size:clamp(22px,2.6vw,27px);line-height:1.25;color:var(--text-head);margin:6px 0 14px}
+article p{margin:0 0 14px}
+article ul{margin:0 0 18px;padding-left:22px}
+article li{margin:0 0 8px}
+article li::marker{color:var(--accent)}
+strong{color:var(--text-head);font-weight:600}
+.callout{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--navy);border-radius:6px;padding:16px 20px;margin:4px 0 20px}
+.callout p{margin:0}
+.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:4px 0 22px}
+.fact{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:15px}
+.fact b{display:block;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent3);margin-bottom:4px}
+@media (max-width:640px){.facts{grid-template-columns:1fr}}
+.tm{overflow-x:auto;margin:4px 0 14px;border:1px solid var(--border);border-radius:6px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14.5px;line-height:1.55}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--border)}
+th{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent3);background:var(--bg2)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600;color:var(--text-head)}
+.more{margin:6px 0 18px;display:flex;flex-wrap:wrap;gap:6px 22px;font-family:var(--mono);font-size:13.5px;font-weight:600}
+.note{font-size:14px;color:var(--text-dim)}
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:28px 0;font-size:13.5px;color:var(--text-dim)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
+article h2{margin-top:6px}
+article code{font-family:var(--mono);font-size:.88em;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:0 4px}
+article em{font-style:italic}
+.tm table{min-width:520px}
+.tm td:first-child{font-weight:600}
+.attrib{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--sky);border-radius:6px;padding:16px 20px;margin:8px 0 20px;font-size:14.5px}
+.attrib p{margin:0 0 6px}.attrib p:last-child{margin:0}
+.discuss{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:20px 22px;margin:8px 0 24px}
+.discuss p{margin:0 0 12px}
+.discuss button{font-family:var(--mono);font-size:13.5px;font-weight:600;color:var(--accent);background:var(--bg);border:1px solid var(--accent);border-radius:4px;padding:8px 14px;cursor:pointer}
+.discuss button:hover{background:var(--bg3)}
+.discuss button:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap">
+  <a class="brand" href="../"><img src="../assets/mark.svg" alt="" width="30" height="30">Lei Zhou</a>
+  <nav aria-label="Site">
+    <a href="../#work">Work</a><a href="../#research">Research</a><a href="../#library">Library</a><a href="../#talks">Talks</a><a href="../#contact">Contact</a>
+  </nav>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <span class="label">Library · Mixed criticality</span>
+  <h1>Mixed-criticality on shared silicon: a primer for Physical AI</h1>
+  <p class="sub">When learned perception and safety-critical control share one SoC, the failure is not that the model is inaccurate. It is that the platform underneath has no contract about interference.</p>
+  <div class="meta">Lei Zhou · background note for the MCIB project · about 7 minutes</div>
+</div></header>
+
+<main><div class="wrap"><article>
+
+<section>
+<h2 id="the-problem">The problem</h2><p>A robot that runs learned perception and safety-critical motion control on one SoC is running two workloads with incompatible characteristics:</p><div class="tm"><table><thead><tr><th></th><th>Inference domain</th><th>Control domain</th></tr></thead><tbody><tr><td>Cadence</td><td>~1–10 Hz, best-effort</td><td>sub-millisecond, hard deadline</td></tr><tr><td>Failure mode</td><td>degraded output</td><td>loss of control authority</td></tr><tr><td>Resource behaviour</td><td>bursty, memory-hungry</td><td>small, predictable, latency-sensitive</td></tr></tbody></table></div><p>Consolidating both onto one piece of silicon is an economic decision that almost every physical AI platform has now made. The consequence is that the two workloads contend for shared resources — last-level cache, memory bandwidth, interconnect, interrupt delivery — and that contention surfaces as jitter in the control loop.</p><p>The failure is not that the model is inaccurate. It is that the platform underneath both workloads has no contract about interference.</p>
+</section>
+
+<section>
+<h2 id="what-earlier-measurement-shows">What earlier measurement shows</h2><p>This section summarises earlier work by the same author, not MCIB results. MCIB has produced no measurements yet and shares no code with the work below. That work is what inspired this project (<a href="https://doi.org/10.5281/zenodo.20967588">DOI 10.5281/zenodo.20967588</a>) evaluated AGL-RT with Linux PREEMPT_RT 6.12 on Arm Cortex-A72 (BCM2711, Raspberry Pi 4B), across five POSIX RTOS primitives, four stressor profiles, and 500,000 iterations per configuration.</p><p><strong>The steady state is not the problem. The tail is.</strong> Medians sit where a real-time engineer would want them — task switching around 2.5 µs, semaphore preemption around 1.5 µs, thread-mode IPC around 5.4 µs — and they barely move across stressor profiles. P99.9 across all five metrics stays under 57 µs.</p><p>Maxima tell a different story. Task-switch latency reaches 140–168 µs against a 2.5 µs median. Process-mode inter-task messaging reaches 595 µs, three orders of magnitude above its median. Mutex acquisition under balanced stress shows a max/min ratio above 1,100×.</p><p>Two conclusions follow, and both matter more than the numbers.</p><p><strong>P99.9 is not a WCET bound.</strong> A percentile that looks comfortable can sit two orders of magnitude below the observed maximum. Any timing argument resting on P99.9 alone is resting on sand.</p><p><strong>Isolation policy is not optional, and it is not partial.</strong> The published work found that the full policy set — CPU isolation, tickless operation, RCU offloading, RT throttling disabled, and interrupt affinity — must be applied together. Omitting any one still produces spikes two to three orders of magnitude above median. Isolation without tickless configuration, for instance, still admits timer-tick interrupts on the supposedly isolated core.</p><p>With the full policy enforced, tail behaviour is bounded.</p>
+</section>
+
+<section>
+<h2 id="what-is-not-yet-established">What is not yet established</h2><p>The published work measured <em>that</em> the tails occur and <em>that</em> isolation policy bounds them. It does not establish the microarchitectural mechanism behind each outlier.</p><p>The mutex result under memory stress is consistent with cache-line eviction by the aggressor, and cross-core acquisition cost is consistent with a coherency round-trip over the interconnect. Both are hypotheses supported by the shape of the data, not attributed findings. Correlating these outliers with hardware performance counters is named in that paper as future work. That open question is what MCIB was inspired by — though MCIB addresses a different problem, inference-plus-control workloads on shared silicon, and needs its own harness to do it.</p><p>This distinction is the whole point of the project. Knowing a control loop occasionally takes 168 µs tells you that you have a problem. Knowing <em>why</em> tells you whether configuration fixes it, whether hardware partitioning fixes it, or whether nothing will.</p>
+</section>
+
+<section>
+<h2 id="two-isolation-architectures-often-conflated">Two isolation architectures, often conflated</h2><p>Discussions of mixed-criticality separation tend to blur two distinct inter-domain transports. They are not interchangeable.</p><p><strong>RPMsg over remoteproc</strong> is the pragmatic near-term choice for a bare-metal or RTOS domain on a separate core. Well-trodden, widely supported in vendor BSPs, less abstraction.</p><p><strong>VirtIO</strong> is the direction aligned with SOAFEE and hypervisor-based consolidation. It buys standardisation and portability at the cost of an abstraction layer whose overhead must be measured against the control domain's budget, not assumed away.</p><p>Both are legitimate; the deciding input should be measured inter-domain overhead against the actual deadline.</p><p>Two Arm mechanisms sit underneath either choice. <strong>SMMU</strong> provides spatial isolation, so the inference domain cannot write into control-domain memory. <strong>MPAM</strong> or <strong>cache colouring</strong> provides temporal partitioning of cache and bandwidth, so the inference domain cannot starve the control domain's working set. MPAM is available on Armv8.4 automotive-class parts and is identified in the published work as a candidate enforcement layer for the residual cache pathway that CPU isolation alone does not close.</p><p>Spatial isolation without temporal partitioning is a common and incomplete configuration. Memory protection does not prevent a cache eviction.</p>
+</section>
+
+<section>
+<h2 id="measurement-discipline-the-hard-won-part">Measurement discipline, the hard-won part</h2><p>Three constraints from building this framework, offered because they cost real time to discover and generalise to any RT benchmarking work on Linux.</p><p><strong>Keep conversion out of the hot path.</strong> Storing only the raw counter delta in the measurement loop and deferring all arithmetic to a post-processing pass is not an optimisation, it is a correctness requirement. Inline tick-to-nanosecond conversion costs tens of nanoseconds on Cortex-A72 — a material fraction of a 2.5 µs interval — and produces visibly bimodal distributions.</p><p><strong>Watch the clock domain boundary.</strong> Kernel GPIO character-device events carry <code>CLOCK_MONOTONIC</code> timestamps. Pairing them with a user-space <code>T0</code> from <code>CLOCK_MONOTONIC_RAW</code> introduces the NTP slew offset and yields latencies that are either absurd or negative. Both endpoints of an interval spanning a kernel event must use the same domain.</p><p><strong>Beware synchronous event delivery.</strong> Driving a GPIO edge via ioctl fires the edge synchronously inside the call. A single thread polling afterwards always finds the event already queued and measures ioctl tail latency rather than interrupt latency. A two-thread design with priority ordering is required for the waiter to be genuinely blocked when the edge arrives.</p>
+</section>
+
+<section>
+<h2 id="why-this-is-becoming-a-compliance-question">Why this is becoming a compliance question</h2><p>For anyone shipping into the EU, two regulations turn the above from an engineering preference into a dated obligation.</p><p><strong>Cyber Resilience Act — Regulation (EU) 2024/2847.</strong> In force since 10 December 2024. Article 14 reporting obligations have applied since <strong>11 September 2026</strong> — that date has passed. They cover products with digital elements <em>already on the EU market</em>, regardless of when they were placed there; there is no legacy exemption. On becoming aware of an actively exploited vulnerability, a manufacturer owes an early warning within 24 hours, full notification within 72 hours, and a final report within 14 days of a corrective measure. The remaining obligations — essential requirements, conformity assessment, CE marking — apply from <strong>11 December 2027</strong>.</p><p><strong>Machinery Regulation — Regulation (EU) 2023/1230.</strong> Applies from <strong>20 January 2027</strong>, replacing Directive 2006/42/EC, and covering robots, cobots, and AMRs. It is the legal mandate; harmonised standards such as IEC 61508, ISO 13849, and ISO 10218 are routes to demonstrating conformity with it, not mandates in their own right.</p><p>For software freedom-from-interference arguments specifically, <strong>IEC 61508 Part 3</strong> is the relevant standard. It is frequently confused with ISO 13849, which addresses machinery safety functions at system level rather than the software non-interference argument.</p><p>Sector-specific regimes take precedence within their domains: ISO/SAE 21434 and UNECE R155/R156 for road vehicles, IEC 62443 for industrial automation. The CRA is horizontal framework legislation, not a replacement for these.</p>
+</section>
+
+<section>
+<h2 id="what-this-project-does-about-it">What this project does about it</h2><p>MCIB measures interference between inference and control workloads on shared silicon, attributes each outlier to a mechanism, and returns a verdict: <code>tune</code>, <code>partition</code>, or <code>ceiling</code>.</p><p>That output is characterisation data. It is not qualified safety evidence — the toolchain is unqualified, and nothing here should be presented as certification evidence. Characterisation data can be an input to a safety argument that a qualified party assembles. The distinction is deliberate.</p><p>See the <a href="https://github.com/zlhk100/physical-ai-mixed-criticality#readme">project README</a> for current status, including what has been measured and what has not.</p>
+</section>
+
+
+<section id="source">
+  <span class="label">Source and licence</span>
+  <h2>About this note</h2>
+  <div class="attrib">
+    <p>Written by Lei Zhou as a background note for <a href="https://github.com/zlhk100/physical-ai-mixed-criticality">MCIB</a>. Text © 2026 Linaro Ltd., licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="https://github.com/zlhk100/physical-ai-mixed-criticality/blob/main/docs/mixed-criticality-primer.md">Original text</a>; lightly edited for the web (formatting, links and one spelling fix).</p>
+    <p>Regulatory dates reflect the position as of September 2026 and are provided for orientation, not as legal advice. Verify against the current official text before relying on them.</p>
+  </div>
+  <div class="more"><a href="https://doi.org/10.5281/zenodo.20967588">Benchmark paper (Zenodo)</a><a href="https://github.com/zlhk100/physical-ai-mixed-criticality">MCIB on GitHub</a><a href="../feed.xml">Follow updates (Atom feed)</a></div>
+</section>
+
+<section id="discuss">
+  <span class="label">Discussion</span>
+  <h2>Questions, counter-examples or data?</h2>
+  <div class="discuss">
+    <p>If you have measured something that confirms or contradicts this note, I would like to hear about it. Comments are hosted in GitHub Discussions and need a GitHub account. Nothing loads from a third party until you click.</p>
+    <button type="button" id="load-discussion">Load the discussion</button>
+    <div id="giscus-slot"></div>
+  </div>
+  <div class="more"><a href="../#library">← Back to the library</a></div>
+</section>
+
+</article></div></main>
+
+<footer><div class="wrap">
+  <span>© Lei Zhou · this note © Linaro Ltd., CC BY 4.0</span>
+  <span>Cookie-free page counts via <a href="https://www.goatcounter.com/">GoatCounter</a> · <a href="../feed.xml">Feed</a></span>
+</div></footer>
+
+<script>
+/* Giscus loads only on request. Fill in GISCUS_REPO_ID and GISCUS_CATEGORY_ID from giscus.app. */
+(function(){
+  var GISCUS_REPO_ID = "";      // e.g. "R_kgDO..."
+  var GISCUS_CATEGORY_ID = "";  // e.g. "DIC_kwDO..."
+  var btn = document.getElementById('load-discussion');
+  var slot = document.getElementById('giscus-slot');
+  if (!GISCUS_REPO_ID || !GISCUS_CATEGORY_ID) {
+    btn.remove();
+    slot.innerHTML = '<p>Discussion opens soon. Meanwhile, email <a href="mailto:zlhk100@gmail.com">zlhk100@gmail.com</a> or open an issue on the <a href="https://github.com/zlhk100/physical-ai-mixed-criticality/issues">MCIB repository</a>.</p>';
+    return;
+  }
+  btn.addEventListener('click', function(){
+    var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var s = document.createElement('script');
+    s.src = 'https://giscus.app/client.js';
+    var a = {'data-repo':'zlhk100/zlhk100.github.io','data-repo-id':GISCUS_REPO_ID,
+      'data-category':'Library','data-category-id':GISCUS_CATEGORY_ID,
+      'data-mapping':'pathname','data-strict':'1','data-reactions-enabled':'1',
+      'data-emit-metadata':'0','data-input-position':'top','data-lang':'en','data-loading':'lazy',
+      'data-theme': dark ? 'dark_dimmed' : 'light','crossorigin':'anonymous'};
+    for (var k in a) s.setAttribute(k, a[k]);
+    s.async = true;
+    slot.appendChild(s);
+    btn.remove();
+  });
+})();
+</script>
+<script data-goatcounter="https://zlhk100.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
