@@ -139,7 +139,7 @@ h3{font-family:var(--sans);font-size:17px;font-weight:600;color:var(--text-head)
 .focus p{margin:8px 0 0;font-size:15.5px}
 @media (max-width:940px){.focus{grid-template-columns:1fr}}
 
-.library{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:56px}
+.library{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:56px}
 .library a.entry{display:block;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:20px 22px;color:var(--text)}
 .library a.entry:hover{text-decoration:none;border-color:var(--accent)}
 .library a.entry h3{color:var(--text-head)}
@@ -317,6 +317,11 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
       <h3>Mixed-criticality on shared silicon</h3>
       <p>A primer for Physical AI: where tail latency comes from when inference and control share an SoC, why isolation must be complete, and why it is now a compliance question.</p>
       <span class="go">Read the primer</span>
+    </a>
+    <a class="entry" href="library/virtio-hypervisors.html">
+      <h3>VirtIO and hypervisors</h3>
+      <p>How virtual devices work: virtqueues and notifications, vhost and vDPA, Xen grants, QNX, L4Re and Gunyah, VFIO, and protected guests, with diagrams and sequences.</p>
+      <span class="go">Read the reference</span>
     </a>
     <a class="entry" href="https://zlhk100.github.io/hw-security-safety-isolation/article/">
       <h3>Security and Safety by Isolation</h3>

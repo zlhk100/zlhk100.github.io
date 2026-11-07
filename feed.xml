@@ -5,9 +5,16 @@
   <link href="https://zlhk100.github.io/feed.xml" rel="self"/>
   <link href="https://zlhk100.github.io/"/>
   <id>https://zlhk100.github.io/</id>
-  <updated>2026-11-05T22:00:00-05:00</updated>
+  <updated>2026-11-07T18:00:00-05:00</updated>
   <author><name>Lei Zhou</name><uri>https://zlhk100.github.io/</uri></author>
   <rights>Written content CC BY 4.0 unless noted</rights>
+  <entry>
+    <title>VirtIO and hypervisors: how virtual devices work</title>
+    <link href="https://zlhk100.github.io/library/virtio-hypervisors.html"/>
+    <id>https://zlhk100.github.io/library/virtio-hypervisors.html</id>
+    <updated>2026-11-07T18:00:00-05:00</updated>
+    <summary>A technical reference on device virtualisation: emulation, VirtIO and assignment; virtqueues and notifications; KVM with vhost, vhost-user and vDPA; Xen grants and IOREQ; QNX, L4Re and Gunyah; VFIO; pKVM and Arm CCA; and virtio-msg.</summary>
+  </entry>
   <entry>
     <title>Mixed-criticality on shared silicon: a primer for Physical AI</title>
     <link href="https://zlhk100.github.io/library/mixed-criticality-primer.html"/>
