@@ -10,7 +10,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://zlhk100.github.io/">
 <meta property="og:title" content="Lei Zhou — Principal Systems Architect & Technical Leader">
-<meta property="og:description" content="Mixed-criticality virtualisation, full-stack platform security and Physical AI. Reliability, safety and security engineered in and demonstrated with measured evidence.">
+<meta property="og:description" content="Mixed-criticality virtualisation, full-stack platform security and Physical AI. Reliability, safety and security engineered in, with claims traced to evidence and residual risk stated.">
 <meta property="og:image" content="https://zlhk100.github.io/assets/og-card.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="alternate" type="application/atom+xml" title="Lei Zhou — updates" href="feed.xml">
@@ -195,7 +195,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   <p class="role">Principal Systems Architect &amp; Technical Leader</p>
   <p class="where">Toronto area, Canada</p>
 
-  <p class="thesis">Reliability, safety and security are engineered in, by design and by disciplined, traceable process: isolation, diverse redundancy and independence that no single fault can break, demonstrated with measured evidence, never assumed.</p>
+  <p class="thesis">Reliability, safety and security are engineered in, by design and by disciplined, traceable process: isolation, diverse redundancy and analysed independence, with claims traced to evidence and residual risk stated.</p>
 
   <p class="intro">I’m a systems architect and player-coach technical leader for embedded, edge and cloud platforms where reliability, security and predictable performance are acceptance criteria, not aspirations.</p>
 
@@ -256,9 +256,9 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     <p>A safety-relevant instrument cluster and an Android Automotive infotainment guest sharing one Arm SoC and one GPU under a type-1 hypervisor. Led the guest graphics move to gfxstream (Vulkan, GLES via ANGLE, zero-copy rendering over VirtIO-GPU) and benchmark-led optimisation. Met the customer’s virtualisation-overhead target and reached parity with the incumbent stack, and supervised the GPU-arbitration track that keeps the instrument cluster free from interference.</p>
   </div>
   <div class="item">
-    <h3>WCET benchmark and outlier attribution for real-time Linux</h3>
+    <h3>Worst-case latency benchmark and outlier attribution for real-time Linux</h3>
     <div class="meta">Linaro · conceived and led</div>
-    <p>An open-source framework that traces every class of latency outlier in Linux PREEMPT_RT to its root cause; 99.1% of task-switching outliers came from kernel non-preemptibility. It became Linaro’s first automotive benchmark capability and the technical foundation of its first Tier-1 automotive engagement.</p>
+    <p>A benchmark framework for five RTOS primitives under Linux PREEMPT_RT, with PMU and ftrace analysis to attribute latency outliers. In a 400K-iteration task-switching proof of concept, 99.1% of the top ~1% of samples had no IRQ or PMU explanation and were assigned to kernel software paths. It became Linaro’s first automotive benchmark capability and the technical foundation of its first Tier-1 automotive engagement.</p>
     <div class="more"><a href="https://doi.org/10.5281/zenodo.20967588">Paper</a><a href="https://doi.org/10.5281/zenodo.20970757">Slides</a></div>
   </div>
   <div class="item">
@@ -297,13 +297,13 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   <h2>Current projects</h2>
   <div class="item">
     <h3>MCIB: Mixed-Criticality Interference Benchmark</h3>
-    <p>An open, platform-neutral specification for attributing interference between AI inference and real-time control on shared silicon: an interference taxonomy, an attribution protocol and a results schema with mandatory provenance. The harness is validated on a Raspberry Pi 4B under PREEMPT_RT; the first measurement campaign is planned on Renesas R-Car V4H.</p>
-    <div class="tags"><span class="tag">Apache-2.0</span><span class="tag">CC BY 4.0</span><span class="tag">PREEMPT_RT</span></div>
+    <p>An open, platform-neutral specification for attributing interference between AI inference and real-time control on shared silicon: an interference taxonomy, an attribution protocol and a results schema with mandatory provenance. Current status: specification and plan, with no measurements yet; the first measurement campaign is planned on Renesas R-Car V4H.</p>
+    <div class="tags"><span class="tag">Apache-2.0</span><span class="tag">CC BY 4.0</span><span class="tag">© Linaro Ltd.</span><span class="tag">PREEMPT_RT</span></div>
     <div class="more"><a href="https://github.com/zlhk100/physical-ai-mixed-criticality">GitHub repository</a><a href="library/mixed-criticality-primer.html">Background primer</a><a href="feed.xml">Follow updates</a></div>
   </div>
   <div class="item">
     <h3>anchorstamp: attested execution evidence for AI agents</h3>
-    <p>Checks what an AI agent claims it did against what an independent observer on the platform recorded, using signed, hash-chained records. The Linux kernel-audit proof of concept detects forged claims and unreported actions across 11 live adversarial scenarios.</p>
+    <p>Checks what an AI agent claims it did against what an independent observer on the platform recorded, using signed, hash-chained records. A Linux kernel-audit proof of concept, run on one laptop across 11 live scenarios, flagged forged claims and unreported actions.</p>
     <div class="tags"><span class="tag">Rust</span><span class="tag">MIT / Apache-2.0</span><span class="tag">Spec part 1 published</span></div>
     <div class="more"><a href="https://github.com/zlhk100/anchorstamp">GitHub repository</a><a href="https://medium.com/@zlhk100/the-agent-you-cant-audit-why-agentic-ai-needs-a-hardware-root-e4187b07ba9e">The Agent You Can’t Audit</a></div>
   </div>
