@@ -120,7 +120,7 @@ a:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius
 .pillar li{margin:0 0 11px}
 @media (max-width:900px){.pillars{grid-template-columns:1fr}}
 .promise{display:block;font-family:var(--serif);font-weight:700;font-size:21px;line-height:1.25;color:var(--text-head);margin:0 0 4px}
-.area h3{margin-top:0}
+.tech{font-family:var(--mono);font-size:12px;line-height:1.55;color:var(--text-dim);border-top:1px solid var(--border);margin:14px 0 8px;padding-top:12px}
 .group{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px;margin:44px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);max-width:var(--max-w)}
 .group:first-of-type{margin-top:0}
 .group .promise{margin:0}
@@ -164,13 +164,7 @@ h3{font-family:var(--sans);font-size:17px;font-weight:600;color:var(--text-head)
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .tag{font-family:var(--mono);font-size:12px;padding:2px 9px;border-radius:3px;background:var(--bg3);border:1px solid var(--border);color:var(--text-dim)}
 
-.focus{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:56px}
-.focus .area{background:var(--bg2);border:1px solid var(--border);border-top:3px solid var(--navy);border-radius:6px;padding:22px 22px 24px}
-.focus .area:nth-child(2){border-top-color:var(--sky)}
-.focus .area:nth-child(3){border-top-color:var(--orange)}
-.focus p{margin:8px 0 0;font-size:15.5px}
-@media (max-width:940px){.focus{grid-template-columns:1fr}}
-
+@media (max-width:940px){
 .library{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:56px}
 .library a.entry{display:block;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:20px 22px;color:var(--text)}
 .library a.entry:hover{text-decoration:none;border-color:var(--accent)}
@@ -259,17 +253,19 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
       <ul>
         <li>Conceived and led the real-time benchmark behind Linaro’s first <span class="nb">Tier-1</span> automotive win</li>
         <li>Optimised a virtio-gpu graphics pipeline, meeting the customer’s virtualisation overhead target and reaching parity with the incumbent stack</li>
-        <li>Spoke at <a href="#talks">Embedded World 2026 and AGL All Member Meeting 2026</a></li>
+        <li>Delivered industrial telemetry for national critical infrastructure, fail-operational over diverse redundant channels</li>
       </ul>
+      <p class="tech">QNX · AGL · Android Automotive · Gunyah · Xen · KVM · timing analysis · interference attribution · GPU virtualisation</p>
     </div>
     <div class="pillar">
       <h3>Secure</h3>
       <div class="pname">Full-stack platform security and confidential computing</div>
       <ul>
-        <li>Took a TrustZone and Trusted Firmware based IoT security platform to PSA Certified Level 2 through an independent lab</li>
+        <li>Took a TrustZone and Trusted Firmware based IoT security platform, with measured boot and attestation-gated onboarding, to PSA Certified Level 2 through an independent lab</li>
         <li><a href="work/secure-video-ife.html">Led delivery of the secure video path and secure boot</a> for an in-flight entertainment (IFE) platform that passed airworthiness qualification and Widevine L1 DRM certification</li>
         <li><a href="work/tee-telematics.html">Led delivery of OP-TEE trusted services</a> for a 5G telematics unit, accepted ahead of schedule</li>
       </ul>
+      <p class="tech">Secure and measured boot · TrustZone · TEEs · attestation · device identity · key management · threat modelling · UNECE R155/R156</p>
     </div>
     <div class="pillar">
       <h3>Accountable</h3>
@@ -279,6 +275,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
         <li>Published <a href="https://github.com/zlhk100/physical-ai-mixed-criticality">MCIB</a>, an open interference-benchmark specification; first measurement campaign planned</li>
         <li>Built <a href="https://github.com/zlhk100/anchorstamp">anchorstamp</a>, a proof of concept that checks an AI agent’s claims against an independent observer</li>
       </ul>
+      <p class="tech">Robotics · inference and control interference · sovereign AI infrastructure · AI agent accountability</p>
     </div>
   </div>
   <ul class="links">
@@ -309,28 +306,6 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   </figure>
 </div></section>
 
-<section id="focus"><div class="wrap">
-  <span class="label">Focus</span>
-  <h2>Where I work</h2>
-  <div class="focus">
-    <div class="area">
-      <span class="promise">Predictable</span>
-      <h3>Mixed-criticality and virtualisation</h3>
-      <p>Consolidating safety-relevant and general-purpose workloads onto one SoC under a hypervisor, for software-defined vehicles and industrial systems, then producing the freedom-from-interference evidence: timing analysis, interference attribution, GPU virtualisation and performance tuning across QNX, AGL, Android Automotive, Gunyah, Xen and KVM.</p>
-    </div>
-    <div class="area">
-      <span class="promise">Secure</span>
-      <h3>Full-stack platform security and confidential computing</h3>
-      <p>From hardware root of trust to the cloud: secure and measured boot, TrustZone and TEEs, attestation, device identity and key management, threat modelling and UNECE R155/R156 conformance, through to securing sovereign AI infrastructure.</p>
-    </div>
-    <div class="area">
-      <span class="promise">Accountable</span>
-      <h3>Physical AI and trustworthy AI systems</h3>
-      <p>Bringing the same reliability and security discipline to robots and AI systems: measuring how AI inference interferes with real-time control on shared silicon, what to do about it, and checking what an AI agent claims against an independent observer.</p>
-    </div>
-  </div>
-</div></section>
-
 <section id="work"><div class="wrap">
   <span class="label">Selected work</span>
   <h2>What I’ve built and led</h2>
@@ -341,9 +316,9 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     <p>A safety-relevant instrument cluster and an Android Automotive infotainment guest sharing one Arm SoC and one GPU under a type-1 hypervisor. Led the guest graphics move to gfxstream (Vulkan, GLES via ANGLE, zero-copy rendering over VirtIO-GPU) and benchmark-led optimisation. Met the customer’s virtualisation-overhead target and reached parity with the incumbent stack, and supervised the GPU-arbitration track that keeps the instrument cluster free from interference.</p>
   </div>
   <div class="item">
-    <h3>WCET benchmark and outlier attribution for real-time Linux</h3>
+    <h3>Worst-case latency benchmark and outlier attribution for real-time Linux</h3>
     <div class="meta">Linaro · conceived and led</div>
-    <p>An open-source framework that traces every class of latency outlier in Linux PREEMPT_RT to its root cause; 99.1% of task-switching outliers came from kernel non-preemptibility. It became Linaro’s first automotive benchmark capability and the technical foundation of its first Tier-1 automotive engagement.</p>
+    <p>A benchmark framework for five RTOS primitives under PREEMPT_RT, using PMU and ftrace analysis to attribute latency outliers. It became Linaro’s first automotive benchmark capability and the technical foundation of its first Tier-1 automotive engagement.</p>
     <div class="more"><a href="https://doi.org/10.5281/zenodo.20967588">Paper</a><a href="https://doi.org/10.5281/zenodo.20970757">Slides</a></div>
   </div>
   <p class="group"><span class="promise">Secure</span><span class="pname">Full-stack platform security and confidential computing</span></p>
@@ -390,7 +365,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   </div>
   <div class="item">
     <h3>anchorstamp: attested execution evidence for AI agents</h3>
-    <p>Checks what an AI agent claims it did against what an independent observer on the platform recorded, using signed, hash-chained records. The Linux kernel-audit proof of concept detects forged claims and unreported actions across 11 live adversarial scenarios.</p>
+    <p>Checks what an AI agent claims it did against what an independent observer on the platform recorded, using signed, hash-chained records. The Linux kernel-audit proof of concept detects forged claims and unreported actions across 11 live scenarios.</p>
     <div class="tags"><span class="tag">Rust</span><span class="tag">MIT / Apache-2.0</span><span class="tag">Spec part 1 published</span></div>
     <div class="more"><a href="https://github.com/zlhk100/anchorstamp">GitHub repository</a><a href="https://medium.com/@zlhk100/the-agent-you-cant-audit-why-agentic-ai-needs-a-hardware-root-e4187b07ba9e">The Agent You Can’t Audit</a></div>
   </div>
@@ -402,7 +377,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   <div class="library">
     <a class="entry" href="library/mixed-criticality-primer.html">
       <h3>Mixed-criticality on shared silicon</h3>
-      <p>A primer for Physical AI: where tail latency comes from when inference and control share an SoC, why isolation must be complete, and why it is now a compliance question.</p>
+      <p>A primer for Physical AI: where tail latency comes from when inference and control share an SoC, why partial isolation falls short, and why it is now a compliance question.</p>
       <span class="go">Read the primer</span>
     </a>
     <a class="entry" href="library/virtio-hypervisors.html">

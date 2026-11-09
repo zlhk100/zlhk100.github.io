@@ -5,7 +5,7 @@
   <link href="https://zlhk100.github.io/feed.xml" rel="self"/>
   <link href="https://zlhk100.github.io/"/>
   <id>https://zlhk100.github.io/</id>
-  <updated>2026-11-09T08:45:00-05:00</updated>
+  <updated>2026-11-09T12:00:00-05:00</updated>
   <author><name>Lei Zhou</name><uri>https://zlhk100.github.io/</uri></author>
   <rights>Written content CC BY 4.0 unless noted</rights>
   <entry>
@@ -19,8 +19,8 @@
     <title>Mixed-criticality on shared silicon: a primer for Physical AI</title>
     <link href="https://zlhk100.github.io/library/mixed-criticality-primer.html"/>
     <id>https://zlhk100.github.io/library/mixed-criticality-primer.html</id>
-    <updated>2026-11-05T22:00:00-05:00</updated>
-    <summary>Where tail latency comes from when AI inference and real-time control share an SoC, why isolation policy must be complete, two isolation architectures, measurement discipline, and the EU compliance dates that make it urgent.</summary>
+    <updated>2026-11-09T12:00:00-05:00</updated>
+    <summary>Where tail latency comes from when AI inference and real-time control share an SoC, why partial isolation falls short, two isolation architectures, measurement discipline, and the EU compliance dates that make it urgent.</summary>
   </entry>
   <entry>
     <title>Case study: TEE trusted services for an automotive telematics unit</title>
@@ -33,7 +33,7 @@
     <title>Case study: secure video streaming for in-flight entertainment</title>
     <link href="https://zlhk100.github.io/work/secure-video-ife.html"/>
     <id>https://zlhk100.github.io/work/secure-video-ife.html</id>
-    <updated>2026-11-09T08:45:00-05:00</updated>
+    <updated>2026-11-09T12:00:00-05:00</updated>
     <summary>Widevine L1 DRM and aviation-qualified secure boot on NXP i.MX8, designed for certification from day one.</summary>
   </entry>
 </feed>
