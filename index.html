@@ -117,6 +117,13 @@ a:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius
 .pillar ul{margin:14px 0 0;padding:0 0 0 18px;font-size:15.5px;line-height:1.55}
 .pillar li{margin:0 0 11px}
 @media (max-width:900px){.pillars{grid-template-columns:1fr}.mv{grid-template-columns:1fr;gap:24px}}
+.promise{display:block;font-family:var(--serif);font-weight:700;font-size:21px;line-height:1.25;color:var(--text-head);margin:0 0 4px}
+.area h3{margin-top:0}
+.group{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px;margin:44px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);max-width:var(--max-w)}
+.group:first-of-type{margin-top:0}
+.group .promise{margin:0}
+.group .pname{margin:0}
+.story p+p{margin-top:12px}
 
 /* Timing figure */
 figure.trace{margin:52px 0 0;padding:0}
@@ -245,7 +252,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   <div class="pillars">
     <div class="pillar">
       <h3>Predictable</h3>
-      <div class="pname">Mixed criticality and virtualisation</div>
+      <div class="pname">Mixed-criticality and virtualisation</div>
       <ul>
         <li>Conceived and led the real-time benchmark behind Linaro’s first <span class="nb">Tier-1</span> automotive win</li>
         <li>Met the customer’s GPU virtualisation overhead target and reached parity with the incumbent stack</li>
@@ -254,7 +261,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     </div>
     <div class="pillar">
       <h3>Secure</h3>
-      <div class="pname">Full-stack platform security</div>
+      <div class="pname">Full-stack platform security and confidential computing</div>
       <ul>
         <li>Took an IoT security platform to PSA Certified Level 2 through an independent lab</li>
         <li><a href="work/secure-video-ife.html">Led delivery of the secure video path and secure boot</a> for an in-flight product that passed airworthiness qualification and Widevine L1 certification</li>
@@ -305,16 +312,19 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   <h2>Where I work</h2>
   <div class="focus">
     <div class="area">
+      <span class="promise">Predictable</span>
       <h3>Mixed-criticality and virtualisation</h3>
       <p>Consolidating safety-relevant and general-purpose workloads onto one SoC under a hypervisor, for software-defined vehicles and industrial systems, then producing the freedom-from-interference evidence: timing analysis, interference attribution, GPU virtualisation and performance tuning across QNX, AGL, Android Automotive, Gunyah, Xen and KVM.</p>
     </div>
     <div class="area">
+      <span class="promise">Secure</span>
       <h3>Full-stack platform security and confidential computing</h3>
       <p>From hardware root of trust to the cloud: secure and measured boot, TrustZone and TEEs, attestation, device identity and key management, threat modelling and UNECE R155/R156 conformance, through to securing sovereign AI infrastructure.</p>
     </div>
     <div class="area">
-      <h3>Physical AI and robotics</h3>
-      <p>Bringing the same reliability and security discipline to robots: measuring how AI inference interferes with real-time control on shared silicon, and what to do about it.</p>
+      <span class="promise">Accountable</span>
+      <h3>Physical AI and trustworthy AI systems</h3>
+      <p>Bringing the same reliability and security discipline to robots and AI systems: measuring how AI inference interferes with real-time control on shared silicon, what to do about it, and checking what an AI agent claims against an independent observer.</p>
     </div>
   </div>
 </div></section>
@@ -322,6 +332,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
 <section id="work"><div class="wrap">
   <span class="label">Selected work</span>
   <h2>What I’ve built and led</h2>
+  <p class="group"><span class="promise">Predictable</span><span class="pname">Mixed-criticality and virtualisation</span></p>
   <div class="item">
     <h3>GPU virtualisation for a software-defined vehicle cockpit</h3>
     <div class="meta">Linaro · tech lead and project manager</div>
@@ -333,6 +344,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     <p>An open-source framework that traces every class of latency outlier in Linux PREEMPT_RT to its root cause; 99.1% of task-switching outliers came from kernel non-preemptibility. It became Linaro’s first automotive benchmark capability and the technical foundation of its first Tier-1 automotive engagement.</p>
     <div class="more"><a href="https://doi.org/10.5281/zenodo.20967588">Paper</a><a href="https://doi.org/10.5281/zenodo.20970757">Slides</a></div>
   </div>
+  <p class="group"><span class="promise">Secure</span><span class="pname">Full-stack platform security and confidential computing</span></p>
   <div class="item">
     <h3>Security and conformance assessment of an automotive SoC BSP</h3>
     <div class="meta">Linaro · assessment lead</div>
@@ -356,6 +368,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     <p>Led a team of about six engineers and consultants from requirements to a commercial design win, owning the architecture and technical design reviews. Defined the security architecture, threat model and roadmap for attestation-gated device onboarding, with the security-sensitive control plane, audit logging and access control running inside a TEE secure enclave, and took the platform through PSA Certified Level 2 at an independent security laboratory.</p>
     <div class="more"><a href="https://medium.com/@zlhk100/use-blockchain-immutable-db-to-provide-decentralized-device-identity-at-scale-836bf5ce18e9">Design article</a></div>
   </div>
+  <p class="group"><span class="promise">Accountable</span><span class="pname">Physical AI and trustworthy AI systems</span></p>
   <div class="item">
     <h3>Sovereign AI infrastructure and AI-native engineering</h3>
     <div class="meta">Linaro · architect and delivery lead</div>
@@ -466,9 +479,9 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   <p>I’m open to conversations about principal architect and technical leadership roles, and to consulting engagements in my focus areas. I’m based in the Toronto area and open to remote, hybrid or relocation for the right role. Email is the quickest way to reach me; my full resume is available on request.</p>
   <p><strong>How I can help as a consultant:</strong></p>
   <ul class="help">
-    <li><b>Mixed-criticality and virtualisation.</b> Consolidation architecture reviews, interference and timing characterisation on real-time Linux and hypervisor platforms, and GPU virtualisation performance.</li>
-    <li><b>Platform security.</b> Secure boot, TEE and attestation architecture, BSP security assessments, and UNECE R155/R156 conformance gap analysis.</li>
-    <li><b>Physical AI platform readiness.</b> Characterising how AI inference interferes with real-time control on your silicon, and which countermeasures fit: tuning, partitioning or a hard ceiling.</li>
+    <li><b>Predictable: mixed-criticality and virtualisation.</b> Consolidation architecture reviews, interference and timing characterisation on real-time Linux and hypervisor platforms, and GPU virtualisation performance.</li>
+    <li><b>Secure: platform security.</b> Secure boot, TEE and attestation architecture, BSP security assessments, and UNECE R155/R156 conformance gap analysis.</li>
+    <li><b>Accountable: Physical AI platform readiness.</b> Characterising how AI inference interferes with real-time control on your silicon, and which countermeasures fit: tuning, partitioning or a hard ceiling.</li>
   </ul>
   <ul class="links">
     <li><a href="mailto:zlhk100@gmail.com">zlhk100@gmail.com</a></li>
@@ -481,7 +494,11 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   <h2>Non-deterministic in, predictable out</h2>
   <div class="mark">
     <img src="assets/logo.svg" alt="The Lei Zhou mark: orange dots converging through a sky-blue dot into a navy dot, inside a navy L-shaped frame" width="96" height="96">
-    <p>The orange dots are the non-deterministic world: physical faults, adversaries, the unknown, and now AI inference. Some of them converge through the sky-blue point, where engineering happens: isolation, diverse redundancy, independence and measurement. They resolve into the navy point, which is predictable, bounded behaviour. The rest stay scattered across the field. That is residual risk, acknowledged and managed with evidence rather than wished away. The navy L is the deterministic frame that holds it all, and the axes it is measured against.</p>
+    <div class="story">
+      <p>Safety engineering never promises zero failure. Security engineering never promises zero vulnerabilities. Now AI is acting in the physical world. So what can engineers actually promise?</p>
+      <p>The orange dots are the non-deterministic world: faults, adversaries, the unknown, and now AI inference. Some converge through the sky-blue point, where engineering happens: isolation, diverse redundancy, independence and measurement. They resolve into navy: predictable behaviour, within known limits. The navy L is the deterministic frame that holds it all, and the axes it is measured against.</p>
+      <p>Some dots never converge. That is residual risk, acknowledged and managed with evidence, not wished away. So we can’t promise that nothing will go wrong. We can promise that we know where it can go wrong, that we’ve contained it, and that our evidence doesn’t come from the system being judged.</p>
+    </div>
   </div>
 </div></section>
 </main>
