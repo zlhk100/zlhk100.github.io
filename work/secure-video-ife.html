@@ -158,7 +158,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
       <tr><td>Device counterfeiting and cloning</td><td>Spoofing</td><td>Device identity (hardware and firmware)</td><td>Immutable silicon root of trust; secure provisioning</td></tr>
       <tr><td>Zero-day or REE-based remote and local attacks</td><td>Denial of service, elevation of privilege</td><td>Sensitive operations (DRM, key handling)</td><td>Security by isolation: OP-TEE with hardware-enforced secure buffers</td></tr>
       <tr><td>Secret or credential extraction; content and IP leakage</td><td>Information disclosure</td><td>Key store, content keys, decrypted video</td><td>Defence in depth: TEE secure storage; data protected at rest, in transit and in use, through to a hardware-protected video path</td></tr>
-      <tr><td>Run-time tampering; software not patched against public CVEs</td><td>Tampering</td><td>Kernel and firmware code and read-only sections; mutable boot code</td><td>Minimal immutable code; secure update of the mutable boot chain over a ten-year life without P/N recertification</td></tr>
+      <tr><td>Run-time tampering; software not patched against public CVEs</td><td>Tampering</td><td>Kernel and firmware code and read-only sections; mutable boot code</td><td>Minimal immutable code, leaving the rest of the boot chain updatable through the customer’s existing update scheme</td></tr>
     </tbody>
   </table></div>
   <p class="note">A simplified version of the project’s threat model, as presented in my <a href="../talks/2023-linaro-connect-london/LHR23-111_Build_Security_Privacy_Compliant_Embedded_System.pdf">Linaro Connect 2023 talk</a> (slide 9), with mitigations shown as applied in this project.</p>
@@ -171,7 +171,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     <div class="fact"><b>Widevine L1</b>Certification passed, on plan</div>
     <div class="fact"><b>P/N qualification</b>Secure boot scheme qualified, on plan</div>
     <div class="fact"><b>EASA</b>Certified for installation on A320 aircraft</div>
-    <div class="fact"><b>First in market</b>First commercial IFE product on NXP’s Linux Widevine L1 solution</div>
+    <div class="fact"><b>First on platform</b>First commercial IFE product on NXP’s Linux Widevine L1 solution</div>
   </div>
   <p>Because compliance was designed in, the solution met the Widevine L1 and P/N qualification requirements from the start of development. The in-seat display and the in-cabin server infrastructure were successfully deployed.</p>
 </section>
