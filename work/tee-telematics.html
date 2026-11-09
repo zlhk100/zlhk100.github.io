@@ -114,7 +114,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
 <section>
   <span class="label">Context</span>
   <h2>A connected vehicle unit on the regulated side of the line</h2>
-  <p>The target was an automotive telematics control unit (TCU) built on the MediaTek MT2735 (quad-core Cortex-A55), connecting the vehicle over 5G and enabling V2X communication. Its secrets and data include TLS credentials, the vehicle’s electronic identity, configuration and security parameters, and owner privacy data.</p>
+  <p>The target was an automotive telematics control unit (TCU) connecting the vehicle over 5G and enabling V2X communication. Its secrets and data include credentials, vehicle identity and owner privacy data.</p>
 </section>
 
 <section>
@@ -126,7 +126,6 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     <li><strong>4.3.2, threats to communication channels:</strong> message spoofing, Sybil attacks, man-in-the-middle and replay.</li>
     <li><strong>4.3.6, threats to vehicle data and code:</strong> extraction or manipulation of data such as the vehicle’s electronic ID or owner data; unauthorised access to diagnostic or driving parameters and configuration; key extraction; leakage of confidential IP; malicious code.</li>
   </ul>
-  <p>Off-the-shelf OpenSSL kept TLS keys and cryptographic operations in the rich operating system, which did not match the security model the threat analysis required.</p>
 </section>
 
 <section>
@@ -138,23 +137,16 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
 <section>
   <span class="label">The approach</span>
   <h2>Threat model first, hardware security wherever possible</h2>
-  <p>Hardening started from the threat model: trust boundaries, assets, and the security properties each asset needs at rest, in transit and in use. The design principle was to prefer hardware-based security wherever the platform offers it:</p>
-  <ul>
-    <li>a hardware-assisted Trusted Execution Environment for defence in depth and security by isolation, hosting sensitive operations and key management;</li>
-    <li>a side-channel-resistant hardware crypto engine behind the crypto library;</li>
-    <li>replay-protected (RPMB) or TPM-based storage for secrets and keys;</li>
-    <li>a hardware firewall protecting memory and peripherals across trust boundaries.</li>
-  </ul>
-  <p>OP-TEE was the foundation: designed around these principles, configurable, and portable across platforms. We extended it with three trusted services.</p>
+  <p>Hardening started from the threat model: trust boundaries, assets, and the security properties each asset needs at rest, in transit and in use. The design principle was to prefer hardware-based security wherever the platform offers it, with OP-TEE as the foundation for security by isolation.</p>
 </section>
 
 <section>
   <span class="label">What we built</span>
   <h2>Three trusted services in OP-TEE</h2>
   <ul>
-    <li><strong>Hardened TLS with mutual authentication.</strong> All sensitive operations behind TLS moved into an OP-TEE trusted application (TA), exposed to OpenSSL through its provider interface: key generation, import and key derivation; symmetric and asymmetric ciphers; signing and verification; key exchange; and key and secure-store management. Private keys never leave the TEE, and the ECDHE key exchange and TLS 1.2 key derivation run inside it too, so the pre-master and master secrets are never exposed to the rich environment.</li>
-    <li><strong>Secure storage with access control.</strong> A secure-storage TA exposed to the rich environment through SDK APIs to import, export, delete, move and look up data objects. It holds data provisioned in production, such as the VIN and part numbers, and security-critical parameters including passwords and device identity. Stored data is cryptographically bound to the individual device.</li>
-    <li><strong>Access control and secure logging.</strong> Access to the trusted services is restricted to privileged client applications, using OP-TEE’s existing access-control capability, and access to the TEE from rich-environment clients is logged in a tamper-resistant way for forensics and auditing.</li>
+    <li><strong>Hardened TLS with mutual authentication.</strong> Sensitive TLS operations and long-term keys are protected inside the TEE.</li>
+    <li><strong>Secure storage with access control.</strong> Vehicle identity and user privacy data are held in TEE-backed secure storage.</li>
+    <li><strong>Tamper-resistant logging.</strong> Security incidents are recorded for forensics and audit.</li>
   </ul>
 </section>
 
@@ -164,13 +156,13 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   <div class="tm"><table>
     <thead><tr><th>Threat vector</th><th>R155 ref.</th><th>Asset</th><th>Mitigation delivered</th></tr></thead>
     <tbody>
-      <tr><td>Message spoofing, man-in-the-middle, replay on telematics and V2X links</td><td>4.3.2</td><td>Communication channels</td><td>TLS with mutual authentication; keys and crypto operations inside an OP-TEE TA via the OpenSSL provider interface</td></tr>
-      <tr><td>Key extraction</td><td>4.3.6</td><td>TLS private keys, symmetric and MAC keys</td><td>Long-term keys generated, imported and used only inside the TEE; ECDHE key exchange and TLS 1.2 key derivation also run there, keeping handshake secrets out of the rich environment</td></tr>
-      <tr><td>Unauthorised access to or tampering with vehicle data, configuration and credentials</td><td>4.3.6</td><td>Electronic identity, VIN and part numbers, security parameters, passwords</td><td>TEE secure storage bound to the device, with access restricted to privileged client applications</td></tr>
-      <tr><td>Misuse of trusted services by unauthorised or compromised rich-environment clients</td><td>4.3.6</td><td>Trusted services and their keys</td><td>TA access control, plus tamper-resistant logging of TEE access for forensics and audit</td></tr>
+      <tr><td>Message spoofing, man-in-the-middle, replay on telematics and V2X links</td><td>4.3.2</td><td>Communication channels</td><td>TLS with mutual authentication</td></tr>
+      <tr><td>Key extraction</td><td>4.3.6</td><td>Cryptographic keys</td><td>Keys protected inside the TEE</td></tr>
+      <tr><td>Unauthorised access to or tampering with vehicle data and credentials</td><td>4.3.6</td><td>Vehicle identity and privacy data</td><td>TEE-backed secure storage with access control</td></tr>
+      <tr><td>Misuse of trusted services</td><td>4.3.6</td><td>Trusted services</td><td>Access control and tamper-resistant logging</td></tr>
     </tbody>
   </table></div>
-  <p class="note">The threat analysis also recommended mitigations outside this SDK’s scope, such as rate-limiting against denial of service; the table shows only what the SDK delivered.</p>
+  <p class="note">The table shows only what this delivery covered.</p>
 </section>
 
 <section>
@@ -180,7 +172,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     <div class="fact"><b>Delivery</b>Delivered and accepted by the customer, ahead of schedule</div>
     <div class="fact"><b>Compliance</b>Security controls traceable to UN R155 Annex 5 threats</div>
     <div class="fact"><b>Keys and data</b>TLS keys and secure-storage data protected by the hardware TEE</div>
-    <div class="fact"><b>Platform</b>Built on OP-TEE for the MediaTek MT2735 telematics unit</div>
+    <div class="fact"><b>Platform</b>Built on OP-TEE for a 5G telematics unit</div>
   </div>
   <div class="more"><a href="../#work">← Back to selected work</a></div>
 </section>
