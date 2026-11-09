@@ -109,6 +109,8 @@ a:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius
 .record{padding-bottom:56px}
 .purpose{padding-top:44px;padding-bottom:0;border-bottom:0}
 .mv{max-width:var(--max-w)}
+.mv p.why{font-family:var(--sans);font-weight:400;font-size:16.5px;line-height:1.65;color:var(--text);margin:14px 0 0}
+.mv p.why:first-of-type{margin-top:20px}
 .mv p{font-family:var(--serif);font-weight:300;font-size:clamp(20px,2vw,23px);line-height:1.38;color:var(--text-head);margin:8px 0 0}
 .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:20px}
 .pillar{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:22px 22px 12px}
@@ -230,10 +232,6 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
 
   <p class="thesis">Reliability, safety and security are engineered in, by design and by disciplined, traceable process: isolation, diverse redundancy and independence that no single fault can break, demonstrated with measured evidence, never assumed.</p>
 
-  <p class="plain">In the Physical AI era, cars, robots, factories and edge systems run safety-relevant, security-critical and unpredictable AI software on the same silicon.</p>
-
-  <p class="plain">Safety and security both depend on one property: integrity. My work is protecting it by design, verifying it through system-level analysis and attestation, and building in the resilience to recover when it is lost.</p>
-
   <div class="cta">
     <a class="btn" href="mailto:zlhk100@gmail.com?subject=Discuss%20a%20role">Discuss a role</a>
     <a class="btn alt" href="mailto:zlhk100@gmail.com?subject=Discuss%20a%20consulting%20engagement">Discuss a consulting engagement</a>
@@ -243,7 +241,11 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
 <main>
 <section id="purpose" class="purpose"><div class="wrap">
   <div class="mv">
-    <div><span class="label">Mission</span><p>Help teams run critical functions and AI on shared platforms, with behaviour they can predict, defend and evidence.</p></div>
+    <div><span class="label">Mission</span><p>Help teams run critical functions and AI on shared platforms, with behaviour they can predict, defend and evidence.</p>
+      <p class="why">In the Physical AI era, cars, robots, factories and edge systems run real-time, safety- and security-critical workloads on the same silicon as non-deterministic noisy neighbours such as AI inference.</p>
+      <p class="why">Safety and security both come down to three questions: Is the system intact? Is it behaving as intended? Can it recover to a safe, secure state when it isn’t?</p>
+      <p class="why">My work is designing the answers in, verifying them through system-level analysis, measurement and attestation, and building in resilience: fail-safe or fail-operational at runtime, secure OTA patching in the field.</p>
+    </div>
   </div>
 </div></section>
 
