@@ -5,9 +5,16 @@
   <link href="https://zlhk100.github.io/feed.xml" rel="self"/>
   <link href="https://zlhk100.github.io/"/>
   <id>https://zlhk100.github.io/</id>
-  <updated>2026-11-09T12:00:00-05:00</updated>
+  <updated>2026-11-14T09:00:00-05:00</updated>
   <author><name>Lei Zhou</name><uri>https://zlhk100.github.io/</uri></author>
   <rights>Written content CC BY 4.0 unless noted</rights>
+  <entry>
+    <title>Case study: QNX and Linux cockpit displays on one PC</title>
+    <link href="https://zlhk100.github.io/work/vcockpit.html"/>
+    <id>https://zlhk100.github.io/work/vcockpit.html</id>
+    <updated>2026-11-14T09:00:00-05:00</updated>
+    <summary>vcockpit composes a QNX 8.0 instrument cluster and a Linux guest, each in its own virtual machine, into one cockpit display on a PC, so cockpit software can be built and integrated before vehicle hardware exists. Open source, with a codelab.</summary>
+  </entry>
   <entry>
     <title>VirtIO and hypervisors: how virtual devices work</title>
     <link href="https://zlhk100.github.io/library/virtio-hypervisors.html"/>

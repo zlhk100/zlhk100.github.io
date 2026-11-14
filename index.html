@@ -21,7 +21,7 @@
   "email":"mailto:zlhk100@gmail.com",
   "address":{"@type":"PostalAddress","addressLocality":"Toronto","addressRegion":"ON","addressCountry":"CA"},
   "alumniOf":{"@type":"CollegeOrUniversity","name":"Nanjing University of Science and Technology"},
-  "knowsAbout":["Mixed-criticality systems","Virtualisation","Platform security","Confidential computing","Trusted execution environments","Real-time Linux","Software-defined vehicles","Physical AI"],
+  "knowsAbout":["Mixed-criticality systems","Virtualisation","Platform security","Confidential computing","Trusted execution environments","Real-time Linux","Software-defined vehicles","QNX","Automotive cockpit displays","Physical AI"],
   "sameAs":["https://www.linkedin.com/in/leizhou","https://github.com/zlhk100","https://medium.com/@zlhk100","https://orcid.org/0009-0006-6999-0729"]},
  {"@type":"WebSite","@id":"https://zlhk100.github.io/#site","url":"https://zlhk100.github.io/","name":"Lei Zhou","author":{"@id":"https://zlhk100.github.io/#lei"}}
 ]}
@@ -301,7 +301,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
       <div class="lane ai"><span><b>AI inference</b>bursty · best-effort</span>
         <svg viewBox="0 0 600 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 H21.6 V4 H64.6 V20 H114.2 V4 H186.5 V20 H246.3 V4 H327.4 V20 H362.4 V4 H421.7 V20 H470.1 V4 H511.2 V20 H600"/></svg></div>
     </div>
-    <figcaption>Mixed criticality in one picture: workloads that must never miss a deadline share a chip with workloads that only need to be fast. My work is keeping them apart, and measuring that they stay apart. Illustration, not measured data.</figcaption>
+    <figcaption>Mixed criticality in one picture: workloads that must never miss a deadline share a chip with workloads that only need to be fast. My work is keeping them apart, and measuring that they stay apart. Illustration, not measured data. For a working example on a PC, see <a href="work/vcockpit.html">vcockpit</a>.</figcaption>
   </figure>
 </div></section>
 
@@ -356,6 +356,12 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
 <section id="research"><div class="wrap">
   <span class="label">Open research</span>
   <h2>Current projects</h2>
+  <div class="item">
+    <h3>vcockpit: QNX and Linux cockpit displays on one PC</h3>
+    <p>A shift-left development environment for vehicle cockpits: a QNX 8.0 instrument cluster and a Linux guest run in separate virtual machines and are composed into one display on a PC, with each frame handed over as a dma-buf file descriptor and never copied by the proxy, input forwarded to the guest under the pointer, and a one-command launcher. A separate monitor checks the telltales the driver would actually see. Entered in the QNX Global Hackathon 2026.</p>
+    <div class="tags"><span class="tag">C</span><span class="tag">QNX 8.0</span><span class="tag">GPL-2.0-or-later</span><span class="tag">CC BY 4.0</span></div>
+    <div class="more"><a href="work/vcockpit.html">Case study</a><a href="https://github.com/zlhk100/vcockpit">GitHub repository</a><a href="https://github.com/zlhk100/vcockpit/blob/main/docs/codelab.md">Codelab</a><a href="https://devpost.com/software/vcockpit-qnx-and-linux-cockpit-displays-on-one-pc">Demo video</a></div>
+  </div>
   <div class="item">
     <h3>MCIB: Mixed-Criticality Interference Benchmark</h3>
     <p>An open, platform-neutral specification for attributing interference between AI inference and real-time control on shared silicon: an interference taxonomy, an attribution protocol and a results schema with mandatory provenance. The harness is validated on a Raspberry Pi 4B under PREEMPT_RT; the first measurement campaign is planned on Renesas R-Car V4H.</p>
