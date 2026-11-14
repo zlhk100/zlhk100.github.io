@@ -91,6 +91,28 @@ td:first-child{font-weight:600;color:var(--text-head)}
 footer{background:var(--bg2);border-top:1px solid var(--border);padding:28px 0;font-size:13.5px;color:var(--text-dim)}
 footer a{color:var(--text-dim);text-decoration:underline;text-underline-offset:3px}
 footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
+
+.fig{margin:8px 0 26px}
+.figbox{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;overflow-x:auto}
+.fig figcaption{font-size:14px;line-height:1.6;color:var(--text-dim);margin-top:8px}
+.dg{display:block;width:100%;height:auto;color:var(--text);font-family:var(--sans)}
+.dg .bx{fill:var(--bg2);stroke:var(--border);stroke-width:1.2}
+.dg .bx2{fill:var(--bg3);stroke:var(--border);stroke-width:1.2}
+.dg .rg{fill:none;stroke:var(--border);stroke-width:1.2;stroke-dasharray:5 4}
+.dg .hl{fill:var(--bg3);stroke:var(--accent3);stroke-width:1.5}
+.dg .sel{fill:var(--bg2);stroke:var(--orange);stroke-width:2}
+.dg .cell{fill:var(--bg);stroke:var(--border)}
+.dg .t{fill:var(--text-head);font-size:12px}
+.dg .tm{fill:var(--text);font-size:10.5px;font-family:var(--mono)}
+.dg .tl{fill:var(--text-dim);font-size:11px}
+.dg .lt{fill:var(--text);font-size:11px}
+.dg .tx{fill:var(--orange);font-size:12px;font-weight:600}
+.dg .ln{fill:none;stroke:currentColor;stroke-width:1.3}
+.dg .lo{fill:none;stroke:var(--orange);stroke-width:1.7}
+.dg .ld{fill:none;stroke:currentColor;stroke-width:1.2;stroke-dasharray:5 4}
+.dg .mk{fill:currentColor}.dg .mko{fill:var(--orange)}
+article ol{margin:0 0 18px;padding-left:22px}
+article ol li{margin:0 0 10px}
 </style>
 </head>
 <body>
@@ -145,6 +167,14 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
     <li><strong>A hardware-protected video path.</strong> OP-TEE with hardware-assisted memory protection, secure storage and cryptographic services, carrying decrypted content through secure buffers to the display.</li>
     <li><strong>Fit, not replace.</strong> Integrated with the customer’s existing boot and update scheme, keeping it maintainable and configurable at runtime.</li>
   </ul>
+</section>
+
+<section>
+  <span class="label">Security architecture</span>
+  <h2>A secure data path, from decryption to display</h2>
+  <p>Widevine L1 requires decrypted video to stay under hardware protection all the way to the screen.</p>
+  <figure class="fig" id="fig-sdp"><div class="figbox"><svg class="dg" viewBox="0 0 760 356" role="img" aria-label="Secure data path for Widevine L1 playback: decryption runs in the TEE; clear and decoded video stay in secure buffers that the TZASC keeps from the non-secure CPU and the RDC keeps from other bus masters." xmlns="http://www.w3.org/2000/svg" style="min-width:640px"><defs><marker id="ifeb-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker><marker id="ifeb-o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mko"/></marker><marker id="ifeb-as" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10,0 L0,5 L10,10 z" class="mk"/></marker><marker id="ifeb-os" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M10,0 L0,5 L10,10 z" class="mko"/></marker></defs><rect x="10" y="10" width="410" height="112" rx="7" class="rg"/><text x="20" y="26" class="tl" text-anchor="start">Normal world · Linux</text><rect x="440" y="10" width="310" height="112" rx="7" class="rg"/><text x="450" y="26" class="tl" text-anchor="start">Secure world · OP-TEE (TrustZone)</text><rect x="24" y="44" width="186" height="58" rx="5" class="bx"/><text x="117.0" y="69.5" class="t" text-anchor="middle">Media player</text><text x="117.0" y="84.5" class="tm" text-anchor="middle">sees handles, never clear video</text><rect x="222" y="44" width="186" height="58" rx="5" class="bx"/><text x="315.0" y="69.5" class="t" text-anchor="middle">Widevine CDM</text><text x="315.0" y="84.5" class="tm" text-anchor="middle">holds no content keys</text><polyline points="210,73 220,73" class="ln" marker-end="url(#ifeb-a)"/><rect x="456" y="44" width="280" height="58" rx="5" class="sel"/><text x="596.0" y="69.5" class="t" text-anchor="middle">Widevine OEMCrypto TA</text><text x="596.0" y="84.5" class="tm" text-anchor="middle">holds content keys, decrypts samples</text><polyline points="408,73 454,73" class="ln" marker-end="url(#ifeb-a)"/><text x="431" y="66" class="lt" text-anchor="middle">decrypt</text><rect x="10" y="140" width="740" height="206" rx="7" class="rg"/><text x="20" y="156" class="tl" text-anchor="start">SoC hardware and memory (i.MX8MQ)</text><text x="738" y="156" class="tx" text-anchor="end">orange: secure buffers</text><rect x="24" y="180" width="106" height="50" rx="5" class="cell"/><text x="77.0" y="201.5" class="t" text-anchor="middle">Encrypted</text><text x="77.0" y="216.5" class="tm" text-anchor="middle">stream</text><rect x="145" y="180" width="106" height="50" rx="5" class="bx"/><text x="198.0" y="201.5" class="t" text-anchor="middle">Crypto engine</text><text x="198.0" y="216.5" class="tm" text-anchor="middle">CAAM</text><rect x="266" y="180" width="106" height="50" rx="5" class="sel"/><text x="319.0" y="201.5" class="t" text-anchor="middle">Clear stream</text><text x="319.0" y="216.5" class="tm" text-anchor="middle">secure buffer</text><rect x="387" y="180" width="106" height="50" rx="5" class="bx"/><text x="440.0" y="201.5" class="t" text-anchor="middle">Video decoder</text><text x="440.0" y="216.5" class="tm" text-anchor="middle">VPU</text><rect x="508" y="180" width="106" height="50" rx="5" class="sel"/><text x="561.0" y="201.5" class="t" text-anchor="middle">Decoded frames</text><text x="561.0" y="216.5" class="tm" text-anchor="middle">secure buffer</text><rect x="629" y="180" width="106" height="50" rx="5" class="bx"/><text x="682.0" y="201.5" class="t" text-anchor="middle">Display</text><text x="682.0" y="216.5" class="tm" text-anchor="middle">controller</text><polyline points="130,205 143,205" class="lo" marker-end="url(#ifeb-o)"/><polyline points="251,205 264,205" class="lo" marker-end="url(#ifeb-o)"/><polyline points="372,205 385,205" class="lo" marker-end="url(#ifeb-o)"/><polyline points="493,205 506,205" class="lo" marker-end="url(#ifeb-o)"/><polyline points="614,205 627,205" class="lo" marker-end="url(#ifeb-o)"/><polyline points="520,102 520,128 198,128 198,178" class="ld" marker-end="url(#ifeb-a)"/><text x="528" y="134" class="lt" text-anchor="start">TA drives the crypto engine</text><rect x="266" y="262" width="348" height="24" rx="5" class="hl"/><text x="440.0" y="278.0" class="t" text-anchor="middle">TZASC: memory split by CPU secure / non-secure state</text><rect x="266" y="294" width="348" height="24" rx="5" class="hl"/><text x="440.0" y="310.0" class="t" text-anchor="middle">RDC: memory split among bus masters, incl. DMA engines</text><rect x="24" y="250" width="130" height="48" rx="5" class="bx"/><text x="89.0" y="270.5" class="t" text-anchor="middle">Linux CPU</text><text x="89.0" y="285.5" class="tm" text-anchor="middle">non-secure mode</text><polyline points="154,274 264,274" class="ld" marker-end="url(#ifeb-a)"/><text x="258" y="268" class="tx" text-anchor="end">✕</text><rect x="624" y="282" width="112" height="48" rx="5" class="bx"/><text x="680.0" y="302.5" class="t" text-anchor="middle">Other masters</text><text x="680.0" y="317.5" class="tm" text-anchor="middle">DMA, GPU…</text><polyline points="624,306 616,306" class="ld" marker-end="url(#ifeb-a)"/><text x="622" y="300" class="tx" text-anchor="start">✕</text></svg></div><figcaption><strong>Secure data path.</strong> Content keys and clear video never reach Linux. Two hardware firewalls, Arm TZASC and NXP RDC, guard the secure buffers.</figcaption></figure>
+  <p class="note">How TZASC and RDC work: <a href="../hw-security-safety-isolation/article/#nxp">Security and Safety by Isolation</a>. Diagram adapted from my <a href="../talks/2023-linaro-connect-london/LHR23-111_Build_Security_Privacy_Compliant_Embedded_System.pdf">Linaro Connect 2023 talk</a> (slide 7).</p>
 </section>
 
 <section>
