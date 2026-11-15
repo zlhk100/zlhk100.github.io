@@ -368,7 +368,7 @@ article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var
 <tr><td>Microkernel vdev (QNX, L4Re)</td><td>Trap plus IPC to the device process</td><td>Shareable</td><td>Deprivileged per-guest process or server task</td><td>Mixed-criticality and certified systems</td></tr>
 </tbody></table></div>
 <p>Two questions settle most decisions. First, does the timing budget of the most critical consumer survive the notification path and any shared backend, measured rather than assumed? Second, if the component that parses guest-controlled rings is compromised, what can it reach? The answers usually lead to a mix: assignment or hardware partitioning for the few devices with hard deadlines, VirtIO with deprivileged backends for the rest, and explicit sharing wherever the guest does not trust the host.</p>
-<p>The first question does not stop at the device. <a href="chain-of-time.html">From chain of trust to chain of time</a> follows a sensor sample across every hop on a consolidated platform and asks the same question of each.</p>
+<p>The first question does not stop at the device. <a href="chain-of-timing.html">From chain of trust to chain of timing</a> follows a sensor sample across every hop on a consolidated platform and asks the same question of each.</p>
 </section>
 
 <section>
@@ -397,7 +397,7 @@ article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var
     <p>Written by Lei Zhou. Text and diagrams © 2026 Lei Zhou, licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</p>
     <p>Specification versions and upstream status reflect the position in November 2026 and move quickly. Check the linked primary sources before relying on them.</p>
   </div>
-  <div class="more"><a href="chain-of-time.html">From chain of trust to chain of time</a><a href="spdm-ide-trust-chain.html">The SPDM/IDE trust chain</a><a href="mixed-criticality-primer.html">Mixed-criticality primer</a><a href="https://zlhk100.github.io/hw-security-safety-isolation/article/">Security and Safety by Isolation</a><a href="../follow.html">Follow updates</a></div>
+  <div class="more"><a href="chain-of-timing.html">From chain of trust to chain of timing</a><a href="spdm-ide-trust-chain.html">The SPDM/IDE trust chain</a><a href="mixed-criticality-primer.html">Mixed-criticality primer</a><a href="https://zlhk100.github.io/hw-security-safety-isolation/article/">Security and Safety by Isolation</a><a href="../follow.html">Follow updates</a></div>
 </section>
 
 <section id="discuss">

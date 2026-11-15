@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>From chain of trust to chain of time — Lei Zhou</title>
-<meta name="description" content="A position paper for Physical AI: access, trust and time contracts at every boundary on a shared SoC, the SPDM/IDE trust chain as a template for a chain of time, where timing breaks hop by hop, and proposals by community.">
+<title>From chain of trust to chain of timing — Lei Zhou</title>
+<meta name="description" content="A position paper for Physical AI: access, trust and time contracts at every boundary on a shared SoC, the SPDM/IDE trust chain as a template for a chain of timing, where timing breaks hop by hop, and proposals by community.">
 <meta name="author" content="Lei Zhou">
-<link rel="canonical" href="https://zlhk100.github.io/library/chain-of-time.html">
+<link rel="canonical" href="https://zlhk100.github.io/library/chain-of-timing.html">
 <link rel="alternate" type="application/atom+xml" title="Lei Zhou — updates" href="../feed.xml">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://zlhk100.github.io/library/chain-of-time.html">
-<meta property="og:title" content="From chain of trust to chain of time">
-<meta property="og:description" content="We know how to build a chain of trust from manufacture to runtime. Physical AI needs a chain of time built the same way. Where it breaks, hop by hop, and what would close it.">
-<meta property="og:image" content="https://zlhk100.github.io/assets/og-chain-of-time.png">
+<meta property="og:url" content="https://zlhk100.github.io/library/chain-of-timing.html">
+<meta property="og:title" content="From chain of trust to chain of timing">
+<meta property="og:description" content="We know how to build a chain of trust from manufacture to runtime. Physical AI needs a chain of timing built the same way. Where it breaks, hop by hop, and what would close it.">
+<meta property="og:image" content="https://zlhk100.github.io/assets/og-chain-of-timing.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Card: From chain of trust to chain of time. A five-step chain of trust (identity, measured boot, admission, enforcement, continuity) above the proposed chain of time with the same five steps">
+<meta property="og:image:alt" content="Card: From chain of trust to chain of timing. A five-step chain of trust (identity, measured boot, admission, enforcement, continuity) above the proposed chain of timing with the same five steps">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
 <link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
@@ -24,7 +24,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
 <script type="application/ld+json">
-{"@context": "https://schema.org", "@type": "TechArticle", "headline": "From chain of trust to chain of time", "author": {"@type": "Person", "name": "Lei Zhou", "url": "https://zlhk100.github.io/"}, "copyrightHolder": {"@type": "Person", "name": "Lei Zhou"}, "copyrightYear": 2026, "license": "https://creativecommons.org/licenses/by/4.0/", "about": ["mixed criticality", "Physical AI", "timing analysis", "Logical Execution Time", "SPDM", "VirtIO", "ROS 2"], "datePublished": "2026-11-15", "url": "https://zlhk100.github.io/library/chain-of-time.html"}
+{"@context": "https://schema.org", "@type": "TechArticle", "headline": "From chain of trust to chain of timing", "author": {"@type": "Person", "name": "Lei Zhou", "url": "https://zlhk100.github.io/"}, "copyrightHolder": {"@type": "Person", "name": "Lei Zhou"}, "copyrightYear": 2026, "license": "https://creativecommons.org/licenses/by/4.0/", "about": ["mixed criticality", "Physical AI", "timing analysis", "Logical Execution Time", "SPDM", "VirtIO", "ROS 2"], "datePublished": "2026-11-15", "url": "https://zlhk100.github.io/library/chain-of-timing.html"}
 </script>
 <style>
 :root{
@@ -159,8 +159,8 @@ article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var
 
 <header class="hero"><div class="wrap">
   <span class="label">Library · Position paper</span>
-  <h1>From chain of trust to chain of time</h1>
-  <p class="sub">Physical AI runs non-deterministic workloads on the same silicon as real-time control. We have learned to build a verifiable chain of trust from manufacture to runtime. The equivalent chain for time, covering how long each step may take and how much of a shared resource it may use, barely exists. This paper sets out where it breaks and what would close it.</p>
+  <h1>From chain of trust to chain of timing</h1>
+  <p class="sub">Physical AI runs non-deterministic workloads on the same silicon as real-time control. We have learned to build a verifiable chain of trust from manufacture to runtime. The equivalent chain for timing, covering how long each step may take and how much of a shared resource it may use, barely exists. This paper sets out where it breaks and what would close it.</p>
   <div class="meta">Lei Zhou · position paper · 15 November 2026 · about 20 minutes</div>
 </div></header>
 
@@ -175,7 +175,7 @@ article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var
     <li><a href="#three">Three contracts, one pattern</a></li>
     <li><a href="#template">The chain of trust as a template</a></li>
     <li><a href="#adds-up">Why time is harder: it adds up</a></li>
-    <li><a href="#hops">Where the chain of time breaks today</a></li>
+    <li><a href="#hops">Where the chain of timing breaks today</a></li>
     <li><a href="#robotics">The trust chain has gaps too</a></li>
     <li><a href="#close">What would close it</a></li>
     <li><a href="#mcib">Where MCIB fits</a></li>
@@ -211,9 +211,9 @@ article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var
 <p>The trust chain is worth studying not because timing is a security problem, but because it is the best worked example of how an industry turned an implicit assumption into a verifiable property. It has five steps, and two composition rules.</p>
 <p>The steps run from manufacture to runtime: a hardware-rooted identity provisioned once; measured boot, which records what actually started; attestation, in which a relying party checks identity and measurements before admitting the device; runtime enforcement, in which IDE protects every transaction afterwards; and, still open, continuity, re-checking during a workload's lifetime rather than only at admission.</p>
 <p>The composition rules matter more than the steps. First, <strong>admission and enforcement are only meaningful together</strong>: IDE without SPDM attestation is encryption without verified identity. Second, <strong>the chain is bounded by its weakest link</strong>: a platform's security posture is bounded by its least-attested component.</p>
-<p>Proposal: build the chain of time with the same structure.</p>
+<p>Proposal: build the chain of timing with the same structure.</p>
 <div class="tm"><table>
-<thead><tr><th>Step</th><th>Chain of trust (exists)</th><th>Chain of time (proposed)</th></tr></thead>
+<thead><tr><th>Step</th><th>Chain of trust (exists)</th><th>Chain of timing (proposed)</th></tr></thead>
 <tbody>
 <tr><td>Identity</td><td>DICE identity provisioned at manufacture</td><td>A declared timing contract per workload and per hop: demand envelope, burst profile, worst-case latency</td></tr>
 <tr><td>Measured boot</td><td>Each firmware stage measured as it starts</td><td>The partitioning configuration that bounds interference (cache and bandwidth partitions, SMMU stage 2, network gate schedules, core pinning) locked, then measured</td></tr>
@@ -229,14 +229,14 @@ article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var
 <p>Security fails at the weakest link. Timing fails at the sum. The end-to-end latency of a sensor-to-actuator path is bounded only if every hop on it is bounded, and the bound is the composition of all of them. A strong hop does not compensate for a weak one, and one unbounded hop makes the whole path unbounded.</p>
 <p>That has two consequences that a trust chain does not face.</p>
 <ul>
-<li><strong>Budgets must be enforced at the source.</strong> In a trust chain, a compromised component damages its own trustworthiness. In a time chain, an unpoliced aggressor consumes shared cache, bandwidth or accelerator time and breaks the bounds of components it never touches. A budget that the aggressor is trusted to respect is not a budget.</li>
+<li><strong>Budgets must be enforced at the source.</strong> In a trust chain, a compromised component damages its own trustworthiness. In a timing chain, an unpoliced aggressor consumes shared cache, bandwidth or accelerator time and breaks the bounds of components it never touches. A budget that the aggressor is trusted to respect is not a budget.</li>
 <li><strong>Hop boundaries must compose.</strong> If each hop's output appears whenever that hop happens to finish, every scheduling change upstream moves the timing of everything downstream, and end-to-end analysis has to be redone. The Logical Execution Time (LET) model, which originated with time-triggered programming and is now used in automotive software, fixes this by making each task read its inputs at the start of a fixed window and publish its outputs at the end, whatever happens inside. Communication then occurs only at fixed points, which gives deterministic timing and data flow and lets tasks compose without re-analysis. Network hops can be modelled the same way, as windows sized to the worst-case transmission time.</li>
 </ul>
 <p>LET has a cost: outputs appear at the end of the window even when the work finished early, which lengthens end-to-end latency, and current research reduces that pessimism using knowledge of the schedule. Its value is that it is the timing equivalent of a well-defined trust boundary. An overrun is detectable at exactly one point, the window end.</p>
 </section>
 
 <section>
-<h2 id="hops">5. Where the chain of time breaks today</h2>
+<h2 id="hops">5. Where the chain of timing breaks today</h2>
 <p>Following a sensor sample through a consolidated platform, hop by hop, shows where timing is enforced, where it is only detected, and where nothing bounds it by design. The last column gives the nearest layer in the MCIB interference-channel taxonomy: the hop says <em>where</em> time is lost, the layer says <em>why</em>.</p>
 <div class="tm"><table>
 <thead><tr><th>Hop</th><th>What exists</th><th>Status</th><th>MCIB layer</th></tr></thead>
@@ -291,7 +291,7 @@ article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var
 
 <section>
 <h2 id="mcib">8. Where MCIB fits</h2>
-<p><a href="https://github.com/zlhk100/physical-ai-mixed-criticality">MCIB</a>, the Mixed-Criticality Interference Benchmark, is the evidence side of the time chain. Its loop is profile → attribute → countermeasure, and each attributed outlier ends in a verdict: <code>tune</code> (configuration removes it), <code>partition</code> (a named isolation mechanism bounds it) or <code>ceiling</code> (a structural limit to design around). In the terms of this paper, attribution tells you which hop broke its contract and why, and the verdict tells you whether that hop's contract can be enforced at all.</p>
+<p><a href="https://github.com/zlhk100/physical-ai-mixed-criticality">MCIB</a>, the Mixed-Criticality Interference Benchmark, is the evidence side of the timing chain. Its loop is profile → attribute → countermeasure, and each attributed outlier ends in a verdict: <code>tune</code> (configuration removes it), <code>partition</code> (a named isolation mechanism bounds it) or <code>ceiling</code> (a structural limit to design around). In the terms of this paper, attribution tells you which hop broke its contract and why, and the verdict tells you whether that hop's contract can be enforced at all.</p>
 <p>Its method fits the third shared requirement in section 2, evidence that does not come from the system being judged: it measures the victim, toggles the aggressor and attributes the difference, using hardware counters as corroboration where the silicon exposes them.</p>
 <p>Its current state is stated plainly in its repository. It has produced no measurements yet; its harness has been validated on a Raspberry Pi 4B under PREEMPT_RT; the specification, taxonomy and results schema are published; the first campaign is planned on Renesas R-Car V4H, and an accelerator time-sharing campaign is in outline. Its output is structured interference characterisation data that a qualified assessor may use as input to a safety argument. It is not qualified safety evidence.</p>
 </section>

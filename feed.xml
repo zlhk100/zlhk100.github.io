@@ -9,11 +9,11 @@
   <author><name>Lei Zhou</name><uri>https://zlhk100.github.io/</uri></author>
   <rights>Written content CC BY 4.0 unless noted</rights>
   <entry>
-    <title>From chain of trust to chain of time</title>
-    <link href="https://zlhk100.github.io/library/chain-of-time.html"/>
-    <id>https://zlhk100.github.io/library/chain-of-time.html</id>
+    <title>From chain of trust to chain of timing</title>
+    <link href="https://zlhk100.github.io/library/chain-of-timing.html"/>
+    <id>https://zlhk100.github.io/library/chain-of-timing.html</id>
     <updated>2026-11-15T12:00:00-05:00</updated>
-    <summary>A position paper for Physical AI: access, trust and time contracts at every boundary on a shared SoC, the SPDM/IDE trust chain as a template for a chain of time, where timing breaks hop by hop, and proposals by community.</summary>
+    <summary>A position paper for Physical AI: access, trust and time contracts at every boundary on a shared SoC, the SPDM/IDE trust chain as a template for a chain of timing, where timing breaks hop by hop, and proposals by community.</summary>
   </entry>
   <entry>
     <title>From specification to silicon: the SPDM/IDE trust chain</title>
