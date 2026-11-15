@@ -5,9 +5,23 @@
   <link href="https://zlhk100.github.io/feed.xml" rel="self"/>
   <link href="https://zlhk100.github.io/"/>
   <id>https://zlhk100.github.io/</id>
-  <updated>2026-11-14T09:00:00-05:00</updated>
+  <updated>2026-11-15T12:00:00-05:00</updated>
   <author><name>Lei Zhou</name><uri>https://zlhk100.github.io/</uri></author>
   <rights>Written content CC BY 4.0 unless noted</rights>
+  <entry>
+    <title>From chain of trust to chain of time</title>
+    <link href="https://zlhk100.github.io/library/chain-of-time.html"/>
+    <id>https://zlhk100.github.io/library/chain-of-time.html</id>
+    <updated>2026-11-15T12:00:00-05:00</updated>
+    <summary>A position paper for Physical AI: access, trust and time contracts at every boundary on a shared SoC, the SPDM/IDE trust chain as a template for a chain of time, where timing breaks hop by hop, and proposals by community.</summary>
+  </entry>
+  <entry>
+    <title>From specification to silicon: the SPDM/IDE trust chain</title>
+    <link href="https://zlhk100.github.io/library/spdm-ide-trust-chain.html"/>
+    <id>https://zlhk100.github.io/library/spdm-ide-trust-chain.html</id>
+    <updated>2026-11-15T11:00:00-05:00</updated>
+    <summary>How DICE identity, SPDM attestation and IDE link protection compose into a verifiable trust chain for confidential computing. First published on LinkedIn in April 2026; now the canonical copy, with six dated corrections.</summary>
+  </entry>
   <entry>
     <title>Case study: QNX and Linux cockpit displays on one PC</title>
     <link href="https://zlhk100.github.io/work/vcockpit.html"/>

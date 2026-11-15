@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From specification to silicon: the SPDM/IDE trust chain — Lei Zhou</title>
+<meta name="description" content="How DICE device identity, SPDM authentication and attestation, and PCIe/CXL IDE compose into a verifiable trust chain for confidential computing, with the storage layer, post-quantum migration and open problems.">
+<meta name="author" content="Lei Zhou">
+<link rel="canonical" href="https://zlhk100.github.io/library/spdm-ide-trust-chain.html">
+<link rel="alternate" type="application/atom+xml" title="Lei Zhou — updates" href="../feed.xml">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://zlhk100.github.io/library/spdm-ide-trust-chain.html">
+<meta property="og:title" content="From specification to silicon: the SPDM/IDE trust chain">
+<meta property="og:description" content="DICE identity, SPDM attestation and IDE link protection, composed into one verifiable chain from manufacture to runtime. Canonical copy, corrected November 2026.">
+<meta property="og:image" content="https://zlhk100.github.io/assets/og-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Lei Zhou mark: non-deterministic in, predictable out">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "TechArticle", "headline": "From specification to silicon: the SPDM/IDE trust chain", "author": {"@type": "Person", "name": "Lei Zhou", "url": "https://zlhk100.github.io/"}, "copyrightHolder": {"@type": "Person", "name": "Lei Zhou"}, "copyrightYear": 2026, "license": "https://creativecommons.org/licenses/by/4.0/", "about": ["SPDM", "PCIe IDE", "DICE", "TDISP", "confidential computing", "attestation"], "datePublished": "2026-04-19", "url": "https://zlhk100.github.io/library/spdm-ide-trust-chain.html", "dateModified": "2026-11-15"}
+</script>
+<style>
+:root{
+  --bg:#faf7f2; --bg2:#f3ede4; --bg3:#ede5d8; --border:#d6cab8;
+  --text:#3a2e22; --text-dim:#6f604c; --text-head:#1e1610;
+  --accent:#2E3192; --accent2:#B9431B; --accent3:#1F6F9E;
+  --navy:#2E3192; --orange:#F15A29; --sky:#37AFE4;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
+    --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
+    --accent:#9EA1F0; --accent2:#F4825F; --accent3:#62C4EE;
+    --navy:#9EA1F0; --orange:#F4825F; --sky:#62C4EE;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
+  --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
+  --accent:#9EA1F0; --accent2:#F4825F; --accent3:#62C4EE;
+  --navy:#9EA1F0; --orange:#F4825F; --sky:#62C4EE;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16.5px;line-height:1.75}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius:2px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 48px}
+@media (max-width:700px){.wrap{padding:0 16px}}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:block}
+.top{border-bottom:1px solid var(--border);background:var(--bg2)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text-head);font-family:var(--serif);font-weight:700;font-size:18px}
+.brand:hover{text-decoration:none}
+.brand img{width:30px;height:30px;display:block}
+.top nav{display:flex;flex-wrap:wrap;gap:4px 22px;font-family:var(--mono);font-size:13px}
+.top nav a{color:var(--text-dim)}
+.top nav a:hover{color:var(--accent)}
+.hero{background:var(--bg2);border-bottom:1px solid var(--border);padding:56px 0 44px}
+.hero h1{font-family:var(--serif);font-weight:700;font-size:clamp(30px,4.6vw,46px);line-height:1.12;color:var(--text-head);margin:14px 0 0;max-width:24ch}
+.sub{font-size:clamp(17px,2vw,19px);font-weight:300;color:var(--text-head);margin:14px 0 0;max-width:60ch}
+.meta{font-family:var(--mono);font-size:12.5px;color:var(--text-dim);margin-top:14px;letter-spacing:.02em}
+article{max-width:760px;padding:24px 0 40px}
+article section{padding:28px 0 4px;border-bottom:1px solid var(--border)}
+article section:last-of-type{border-bottom:0}
+h2{font-family:var(--serif);font-weight:700;font-size:clamp(22px,2.6vw,27px);line-height:1.25;color:var(--text-head);margin:6px 0 14px}
+article p{margin:0 0 14px}
+article ul{margin:0 0 18px;padding-left:22px}
+article li{margin:0 0 8px}
+article li::marker{color:var(--accent)}
+strong{color:var(--text-head);font-weight:600}
+.callout{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--navy);border-radius:6px;padding:16px 20px;margin:4px 0 20px}
+.callout p{margin:0}
+.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:4px 0 22px}
+.fact{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:15px}
+.fact b{display:block;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent3);margin-bottom:4px}
+@media (max-width:640px){.facts{grid-template-columns:1fr}}
+.tm{overflow-x:auto;margin:4px 0 14px;border:1px solid var(--border);border-radius:6px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14.5px;line-height:1.55}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--border)}
+th{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent3);background:var(--bg2)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600;color:var(--text-head)}
+.more{margin:6px 0 18px;display:flex;flex-wrap:wrap;gap:6px 22px;font-family:var(--mono);font-size:13.5px;font-weight:600}
+.note{font-size:14px;color:var(--text-dim)}
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:28px 0;font-size:13.5px;color:var(--text-dim)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
+article h2{margin-top:6px}
+article code{font-family:var(--mono);font-size:.88em;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:0 4px}
+article em{font-style:italic}
+.tm table{min-width:520px}
+.tm td:first-child{font-weight:600}
+.attrib{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--sky);border-radius:6px;padding:16px 20px;margin:8px 0 20px;font-size:14.5px}
+.attrib p{margin:0 0 6px}.attrib p:last-child{margin:0}
+.discuss{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:20px 22px;margin:8px 0 24px}
+.discuss p{margin:0 0 12px}
+.discuss button{font-family:var(--mono);font-size:13.5px;font-weight:600;color:var(--accent);background:var(--bg);border:1px solid var(--accent);border-radius:4px;padding:8px 14px;cursor:pointer}
+.discuss button:hover{background:var(--bg3)}
+.discuss button:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+
+.toc{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px 20px 8px;margin:26px 0 6px;font-size:15px}
+.toc ol{margin:6px 0 8px;padding-left:22px;columns:2;column-gap:28px}
+.toc li{margin:0 0 4px;break-inside:avoid}
+@media (max-width:640px){.toc ol{columns:1}}
+.fig{margin:10px 0 24px}
+.figbox{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;overflow-x:auto}
+.fig figcaption{font-size:14px;line-height:1.6;color:var(--text-dim);margin-top:8px}
+.dg{display:block;width:100%;height:auto;color:var(--text);font-family:var(--sans)}
+.dg .bx{fill:var(--bg2);stroke:var(--border);stroke-width:1.2}
+.dg .bx2{fill:var(--bg3);stroke:var(--border);stroke-width:1.2}
+.dg .rgb{fill:var(--bg);stroke:var(--border);stroke-dasharray:3 3}
+.dg .rg{fill:none;stroke:var(--border);stroke-width:1.2;stroke-dasharray:5 4}
+.dg .hl{fill:var(--bg3);stroke:var(--accent3);stroke-width:1.5}
+.dg .sel{fill:var(--bg2);stroke:var(--orange);stroke-width:2}
+.dg .cell{fill:var(--bg);stroke:var(--border)}
+.dg .hd{fill:var(--bg3);stroke:var(--border)}
+.dg .act{fill:var(--bg3);stroke:var(--border)}
+.dg .note{fill:var(--bg2);stroke:var(--border);stroke-dasharray:4 3}
+.dg .pill{fill:var(--bg);stroke:var(--border)}
+.dg .life{stroke:var(--border);stroke-width:1.2;stroke-dasharray:3 4}
+.dg .sep{stroke:var(--border);stroke-width:1;stroke-dasharray:2 4}
+.dg text{dominant-baseline:auto}
+.dg .t{fill:var(--text-head);font-size:12px}
+.dg .th{fill:var(--text-head);font-size:12px;font-weight:600}
+.dg .ta,.dg .tn{fill:var(--text);font-size:11.5px}
+.dg .tp{fill:var(--text-dim);font-size:11px;font-family:var(--mono)}
+.dg .tm{fill:var(--text);font-size:10.5px;font-family:var(--mono)}
+.dg .tl{fill:var(--text-dim);font-size:11px}
+.dg .lt{fill:var(--text);font-size:11px}
+.dg .tt{fill:var(--accent);font-size:11px;font-family:var(--mono);font-weight:600;letter-spacing:.06em}
+.dg .ln{fill:none;stroke:currentColor;stroke-width:1.3}
+.dg .lo{fill:none;stroke:var(--orange);stroke-width:1.7}
+.dg .ld{fill:none;stroke:currentColor;stroke-width:1.2;stroke-dasharray:5 4}
+.dg .tx{fill:var(--orange);font-size:16px;font-weight:600}
+.dg .mk{fill:currentColor}.dg .mko{fill:var(--orange)}
+.refs{font-size:14.5px}.refs li{margin:0 0 6px}
+article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--text-head);margin:22px 0 10px}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap">
+  <a class="brand" href="../"><img src="../assets/mark.svg" alt="" width="30" height="30">Lei Zhou</a>
+  <nav aria-label="Site">
+    <a href="../#work">Work</a><a href="../#research">Research</a><a href="../#library">Library</a><a href="../#talks">Talks</a><a href="../#contact">Contact</a>
+  </nav>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <span class="label">Library · Platform security</span>
+  <h1>From specification to silicon: the SPDM/IDE trust chain</h1>
+  <p class="sub">How DICE-rooted device identity, SPDM authentication and attestation, and IDE-protected interconnect compose into a verifiable end-to-end security model for heterogeneous confidential computing, and where storage and post-quantum cryptography fit today.</p>
+  <div class="meta">Lei Zhou · practitioner's synthesis · first published 19 April 2026 · corrected 15 November 2026 · about 15 minutes</div>
+</div></header>
+
+<main><div class="wrap"><article>
+
+<div class="callout" style="margin-top:26px"><p><strong>About this copy.</strong> This article was first published on LinkedIn on 19 April 2026. This page is now the canonical copy. Six factual points were corrected on 15 November 2026 after checking them against primary sources; they are listed in <a href="#corrections">Corrections</a>. Part of its argument continues in <a href="chain-of-time.html">From chain of trust to chain of time</a>.</p></div>
+
+<nav class="toc" aria-label="Contents">
+  <span class="label">Contents</span>
+  <ol>
+    <li><a href="#tls">Why TLS alone cannot close the threat model</a></li>
+    <li><a href="#ocp">The OCP platform trust model</a></li>
+    <li><a href="#spdm">SPDM: authentication and attestation</a></li>
+    <li><a href="#ide">IDE: protection on the interconnect</a></li>
+    <li><a href="#chain">The complete trust chain</a></li>
+    <li><a href="#industry">Where the industry has moved</a></li>
+    <li><a href="#storage">The storage layer</a></li>
+    <li><a href="#pqc">The post-quantum frontier</a></li>
+    <li><a href="#open">Open problems</a></li>
+    <li><a href="#corrections">Corrections</a></li>
+  </ol>
+</nav>
+
+<section>
+<p>Revisiting research notes and blog posts I wrote a couple of years ago on confidential computing and OCP security protocols, I was struck by how quickly the industry has moved, from collaborative specification work to production deployment. What I was studying as emerging architecture in 2024 now ships in data-centre silicon. That prompted me to pull my notes together, update them against the current state of the art, and write this as much to sharpen my own understanding as to share it with others tracking the same space.</p>
+<p>This article focuses on the trust chain that makes heterogeneous confidential computing architecturally coherent: how DICE-rooted device identity, SPDM-based authentication and attestation, and IDE-protected interconnect compose into a verifiable end-to-end security model, and where the NVMe storage layer and post-quantum cryptography fit into that picture today.</p>
+</section>
+
+<section>
+<h2 id="tls">1. Why TLS alone cannot close the threat model</h2>
+<p>TLS protects data in transit across IP networks by establishing authenticated, encrypted channels between software endpoints. It is well understood, widely deployed and mature. But TLS says nothing about whether the hardware underneath those endpoints is trustworthy, and in heterogeneous compute environments that assumption gap is architecturally significant.</p>
+<p>Consider a confidential AI inference workload in an OCP data centre: a tenant's proprietary model weights are loaded into GPU memory over a PCIe or CXL fabric, processed across compute nodes and persisted to NVMe storage, all on infrastructure shared with other tenants and administered by operators outside the tenant's trust boundary. The confidential computing threat model identifies three attack surfaces that TLS cannot address:</p>
+<ul>
+<li><strong>Physical interconnect attacks:</strong> sniffing, tampering with or replaying PCIe Transaction Layer Packets (TLPs) or CXL flits on the physical fabric. TLS terminates at the OS or application layer and never touches the wire between CPU and peripheral.</li>
+<li><strong>Rogue or cloned components:</strong> a counterfeit or compromised accelerator, NIC or storage controller that presents a legitimate-looking interface while exfiltrating data or forging measurement results. The conventional boot stack has no mechanism to verify cryptographically that a PCIe device is what it claims to be.</li>
+<li><strong>Unauthorised DMA:</strong> PCIe devices can read or write host memory asynchronously. An IOMMU confines where a device may write, but it does not authenticate the device or verify its firmware.</li>
+</ul>
+<p>Closing these three attack surfaces requires extending the confidential computing trust model outward from the processor enclave to every participating component in the fabric. SPDM and IDE are the industry's collaborative response to exactly that requirement.</p>
+</section>
+
+<section>
+<h2 id="ocp">2. The OCP platform trust model: three requirements</h2>
+<p>The Open Compute Project's security appraisal work rests on one idea: trustworthiness in a distributed compute platform is not assumed but constructed, through a verifiable chain of evidence anchored in hardware and extended to every component through measurement and attestation.</p>
+<p>In a typical OCP rack, CPU clusters, GPU nodes, DPU offload engines and NVMe storage controllers are connected over PCIe, CXL or InfiniBand. Each device has its own firmware, its own execution environment and its own attack surface. <strong>The platform's security posture is bounded by its least-attested component.</strong> Three requirements must be satisfied together:</p>
+<ul>
+<li><strong>Hardware root of trust.</strong> Each device needs a hardware-anchored identity provisioned at manufacture, implemented through the TCG DICE (Device Identifier Composition Engine) architecture. DICE derives a Compound Device Identifier (CDI) at each boot layer by applying a one-way function over the current layer's CDI and the hash of the next layer's firmware. A device running modified firmware produces a different CDI, and therefore a different, non-matching attestable identity.</li>
+<li><strong>Component authentication and attestation.</strong> Before a device is admitted to a confidential execution environment, a relying party verifies its identity and firmware integrity through a challenge-response protocol. Boot-time attestation establishes the initial trust state; runtime attestation continuity is still being standardised.</li>
+<li><strong>Integrity of the confidential execution environment.</strong> The TEE stack itself (Intel TDX, AMD SEV-SNP, Arm CCA) must be measured and its measurements reported to the relying party. Extending the same rigour to devices attached over PCIe and CXL is the problem SPDM and IDE were designed to solve.</li>
+</ul>
+</section>
+
+<section>
+<h2 id="spdm">3. SPDM: device authentication and firmware attestation over any transport</h2>
+<p>The Security Protocol and Data Model (SPDM), defined by DMTF in DSP0274, is a transport-agnostic protocol for authenticating hardware components and exchanging cryptographic measurements over PCIe, CXL, USB or any MCTP-capable transport. It runs between a <em>Requester</em>, typically the host CPU, a BMC or a TEE Security Manager (TSM), and a <em>Responder</em>, the device: a GPU, NVMe controller, NIC or other endpoint.</p>
+<p><strong>Phase 1: capability and algorithm negotiation.</strong> The session opens with <code>GET_CAPABILITIES</code> and <code>NEGOTIATE_ALGORITHMS</code>, which settle the SPDM version, hash and asymmetric algorithms and measurement hash types before anything sensitive is exchanged. Negotiation also establishes whether the session will support key exchange for secured messaging, which IDE key management later depends on.</p>
+<p><strong>Phase 2: certificate-based device authentication.</strong> The Requester retrieves the Responder's certificate chain with <code>GET_DIGESTS</code> and <code>GET_CERTIFICATE</code>. The chain is rooted in the device's hardware root of trust and provisioned at manufacture, typically an IDevID certificate signed by the manufacturer's CA. The Requester sends a <code>CHALLENGE</code> with a fresh nonce; the Responder signs it with an attestation private key that is protected by the root of trust and never leaves the device. Verifying that signature against the chain authenticates the device. A counterfeit cannot forge it without the genuine device's key.</p>
+<p><strong>Phase 3: firmware measurement and remote attestation.</strong> With <code>GET_MEASUREMENTS</code>, the Requester retrieves the Responder's signed firmware measurements, digests of individual firmware components computed by the root of trust during measured boot. A verification service compares them with reference values. A device with modified firmware produces measurements that deviate, and policy decides what follows. This is what defeats the rogue-component attack at its root.</p>
+<div class="callout"><p>SPDM does for hardware components what TLS does for software endpoints, with the trust anchor in a hardware root of trust rather than a software-managed certificate store. The authenticated identity is bound to the physical device through the DICE CDI chain, not to a software identity that can be stolen or copied.</p></div>
+</section>
+
+<section>
+<h2 id="ide">4. IDE: confidentiality and integrity on the interconnect</h2>
+<p>Authentication and attestation establish that a device is trustworthy when it is admitted. Integrity and Data Encryption (IDE), defined by PCI-SIG for PCIe and by the CXL Consortium for CXL from 2.0, keeps it that way for every transaction afterwards by encrypting and integrity-protecting traffic on the link.</p>
+<p><em>Selective IDE</em> protects specific streams between a host and a device function, so confidential workload traffic can be separated from management traffic on the same link. <em>Link IDE</em> protects all traffic on one point-to-point link. The right mode depends on the deployment's isolation requirements and overhead budget.</p>
+<p>The construction is AES-256-GCM over the TLP payload and relevant header fields, with the IV derived from a counter to give replay protection. <strong>Keys reach the link in two steps.</strong> SPDM <code>KEY_EXCHANGE</code> and <code>FINISH</code> first establish a secure SPDM session using ephemeral key agreement, which gives that session forward secrecy. The IDE stream keys are then delivered over the session by the IDE key management protocol, IDE_KM: the host side programs the keys into the device (<code>KEY_PROG</code>) and switches them on (<code>K_SET_GO</code>). The SPDM session protects key delivery; it does not itself derive the stream keys.</p>
+<p>That gives a critical architectural dependency: IDE establishment presupposes a completed SPDM authentication and measurement exchange. The two protocols are not independent. IDE's guarantees mean something only if the device at the other end of the encrypted link has been authenticated and its firmware verified. SPDM is the trust foundation; IDE is the runtime enforcement built on it. <strong>IDE without SPDM attestation is encryption without verified identity</strong>, which defeats the threat model.</p>
+<p>For CXL, IDE covers all three protocols: CXL.io follows PCIe IDE, and CXL.cache and CXL.mem traffic is protected at the flit level. What link protection does not do is bring a memory device inside a confidential VM's trust boundary. CXL 3.1 added the TEE Security Protocol (TSP) for that, for directly attached memory devices. Attestation across CXL switch hops remains open.</p>
+</section>
+
+<section>
+<h2 id="chain">5. The complete trust chain: composing DICE, SPDM and IDE</h2>
+<p>The architectural value comes from the composition, not from any one mechanism. Together they form a verifiable chain from manufacture through runtime:</p>
+<ol>
+<li><strong>Root of trust and DICE identity (manufacture).</strong> The manufacturer provisions an IDevID key pair anchored in the hardware root of trust and seeds the DICE CDI chain, binding each firmware layer's identity to its measured image. The manufacturer's CA issues the attestation certificate. This is the only step that happens outside the operational environment, and it cannot be repeated after the fact.</li>
+<li><strong>Measured boot (power-on).</strong> The root of trust measures each firmware stage, from bootloader to main image, security firmware and configuration, and derives a new CDI at each layer. Tampering between manufacture and boot shows up as a CDI deviation that SPDM attestation can detect.</li>
+<li><strong>SPDM authentication and attestation (session establishment).</strong> The Requester negotiates capabilities, retrieves the certificate chain, challenges with a fresh nonce and retrieves signed measurements. The verification result decides whether the device is admitted.</li>
+<li><strong>IDE establishment (SPDM secure session, then IDE_KM).</strong> After successful attestation, <code>KEY_EXCHANGE</code> and <code>FINISH</code> set up a forward-secret SPDM session, over which IDE_KM programs and activates the stream keys. Every subsequent TLP on the protected stream is encrypted and integrity-protected.</li>
+<li><strong>Workload admission and runtime.</strong> The device is admitted to the confidential environment. For TEE-IO, TDISP additionally manages the assignment of a device interface to a specific trust domain, giving VM-level granularity of device trust.</li>
+</ol>
+</section>
+
+<section>
+<h2 id="industry">6. Where the industry has moved since 2024</h2>
+<p>When this architecture was discussed in OCP and DMTF working groups in 2023 and 2024, it was forward-looking specification work. Since then:</p>
+<ul>
+<li><strong>NVIDIA H100 (Hopper).</strong> In confidential computing mode the driver in the confidential VM establishes an SPDM session with the GPU. Each GPU carries a device identity key provisioned at manufacture; the verifier checks the certificate chain against NVIDIA's revocation service and compares signed firmware measurements with reference values before the GPU is moved to its ready state.</li>
+<li><strong>Intel TDX Connect on Xeon 6 (announced 2025).</strong> Intel announced TDX Connect, its TEE-IO implementation, to extend the TDX trust boundary to PCIe-attached devices. TDISP messages travel over SPDM secure sessions, giving VM-granularity device assignment with cryptographic trust between trust domains and device functions.</li>
+<li><strong>Micron 7500 and 6550 ION NVMe SSDs.</strong> Both support SPDM 1.2 attestation; the 6550 ION targets the OCP Datacenter NVMe SSD Specification 2.5. Version 2.7 of that specification (2026) has dedicated sections for SPDM certificates and SPDM firmware measurements. NVMe storage attestation has moved from proposal to shipping product.</li>
+<li><strong>Joint announcement, 28 May 2025.</strong> DMTF, the CXL Consortium, NVM Express, PCI-SIG, SNIA and TCG jointly announced SPDM's evolution to support post-quantum cryptography aligned with NSA's CNSA 2.0 suite. Broadcom stated that its PCIe Ethernet NICs and NVMe storage adapters use DMTF's SPDM and PQC standards.</li>
+</ul>
+</section>
+
+<section>
+<h2 id="storage">7. The storage layer: where the architecture is still maturing</h2>
+<p>GPU and accelerator attestation over SPDM is established in production. The NVMe storage layer is where the next chapter is being written, and where the composition of security layers is most complex.</p>
+<p>An NVMe controller that implements SPDM takes the Responder role, receiving SPDM messages over MCTP through the NVMe Management Interface. Its firmware must include a correctly isolated SPDM responder: protected by the controller's root of trust, isolated from the data path, and itself included in the device's measurements. If the responder is not in the attestation evidence, the chain is broken at the storage layer. A compromised responder that reports clean measurements while the rest of the firmware is modified is exactly the attack measurement is meant to prevent.</p>
+<p><strong>For controllers that host mixed-criticality firmware</strong>, separating real-time block I/O from management and security functions, placing the SPDM responder in the right criticality domain is a non-trivial architecture decision. The security firmware must be isolated from the data path while sharing the same root of trust. Getting that partitioning wrong creates measurement gaps an attacker can exploit.</p>
+<p>Above SPDM and IDE, TCG Opal, Ruby and Pyrite define self-encrypting drive key management and access control for data at rest on the media. IDE protects data in transit between host and controller; TCG governs keys for data at rest. Both must be composed correctly. IDE without media encryption leaves data unprotected after drive removal. A self-encrypting drive without SPDM attestation cannot have its controller firmware verified before it is trusted with key material.</p>
+</section>
+
+<section>
+<h2 id="pqc">8. The post-quantum frontier</h2>
+<p>The May 2025 roadmap is not distant planning. NSA's CNSA 2.0 guidance expects new National Security Systems acquisitions to be CNSA 2.0 compliant from January 2027, a date inside a typical silicon development cycle.</p>
+<p>The practical threat is "harvest now, decrypt later" against recorded SPDM sessions. An adversary who captures SPDM key exchange traffic today, including the session that carries IDE key material, can attempt decryption once quantum capability is sufficient to break today's elliptic-curve key exchange. For infrastructure with a decade-plus operational life, that is not theoretical.</p>
+<p>Integrating PQC into SPDM is more than substituting algorithms. Certificate chains rooted in the hardware root of trust must be reissued with PQC signatures, and manufacturers must move measurement signing to PQC algorithms at manufacture. The DICE CDI derivation itself uses symmetric key derivation and is not directly exposed, but the asymmetric cryptography in SPDM certificate chains and key exchange is. It is a layered migration, not a single switch.</p>
+</section>
+
+<section>
+<h2 id="open">9. Open problems</h2>
+<ul>
+<li><strong>Multi-hop CXL attestation.</strong> CXL switch topologies do not yet have a fully standardised way to forward and verify attestation evidence across hops. A device two switches away cannot yet be attested with the rigour of a directly attached one.</li>
+<li><strong>Runtime attestation continuity.</strong> SPDM attestation is primarily a session-establishment mechanism. Continuous re-measurement through a workload's lifetime is handled inconsistently and is not yet standardised.</li>
+<li><strong>PQC migration for fielded devices.</strong> Devices already deployed with elliptic-curve attestation certificates cannot be reprovisioned with PQC certificates without root-of-trust involvement, and current specifications do not fully address that migration path.</li>
+</ul>
+<p>The second of these has a counterpart outside security. A chain of trust verified once at admission says nothing about whether a device keeps behaving, or keeps meeting its deadlines, afterwards. <a href="chain-of-time.html">From chain of trust to chain of time</a> applies the structure of this chain to timing in Physical AI systems.</p>
+</section>
+
+<section>
+<h2 id="corrections">Corrections, 15 November 2026</h2>
+<p>Checked against primary sources when this page became the canonical copy. The text above includes these corrections.</p>
+<ol>
+<li><strong>IDE key establishment.</strong> The original said IDE session keys are negotiated through SPDM <code>KEY_EXCHANGE</code> and <code>FINISH</code> "via IDE_KM". The SPDM exchange creates the forward-secret secure session; IDE stream keys are programmed by the host side over that session using IDE_KM and activated with <code>K_SET_GO</code>.</li>
+<li><strong>CXL.</strong> The original said CXL.cache and CXL.mem introduce attack surfaces "IDE alone does not address". CXL IDE protects CXL.cache and CXL.mem at the flit level as well as CXL.io. The remaining gap is bringing memory devices into a TEE trust boundary, which CXL 3.1 addresses with TSP for directly attached devices.</li>
+<li><strong>Micron 7500.</strong> The original placed both Micron drives under OCP specification 2.5. Micron describes the 7500 against OCP specification 2.0; the 6550 ION against 2.5. Both support SPDM 1.2.</li>
+<li><strong>OCP NVMe SSD specification 2.7.</strong> The original dated it October 2025. OCP listed 2.7 as coming soon in September 2025, and the published document carries a 2026 version date. Whether its SPDM sections are mandatory was not confirmed, so the text now says only that it has dedicated sections.</li>
+<li><strong>Intel TDX Connect.</strong> The original said TEE-IO support "launched" in February 2025. The sources confirm an announcement in early 2025, not general availability.</li>
+<li><strong>NVIDIA H100.</strong> The original gave a 2024 general-availability date, an ECC key type and an OCSP service. The SPDM session, per-device identity key and revocation check are supported by public sources; the date, key type and protocol name were not confirmed and have been removed.</li>
+</ol>
+</section>
+
+<section>
+<h2 id="references">References</h2>
+<ol class="refs">
+<li>DMTF, <a href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0275_1.0.2.pdf">DSP0275: SPDM over MCTP binding</a> and <a href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0276_1.3.0.pdf">DSP0276: Secured Messages using SPDM over MCTP</a>; <a href="https://github.com/DMTF/libspdm">libspdm reference implementation</a>.</li>
+<li>CHIPS Alliance, <a href="https://chipsalliance.github.io/caliptra-mcu-sw/ide_km.html">Caliptra IDE_KM support</a> (IDE_KM messages carried as application data over SPDM secure sessions; key programming).</li>
+<li>CXL Consortium, <a href="https://computeexpresslink.org/blog/insight-into-cxl-2-0-security-features-and-benefits-1085/">Insight into CXL 2.0 security features</a>; <a href="https://computeexpresslink.org/wp-content/uploads/2023/12/CXL_3.1-White-Paper_FINAL.pdf">CXL 3.1 white paper</a> (TSP).</li>
+<li>Synopsys, <a href="https://www.synopsys.com/articles/tee-device-interface-secure-protocol.html">TEE Device Interface Security Protocol (TDISP) for PCIe and CXL</a>.</li>
+<li>Joint announcement, <a href="https://www.businesswire.com/news/home/20250528847702/en">SPDM post-quantum support and CNSA 2.0 alignment</a>, 28 May 2025.</li>
+<li>Micron, <a href="https://www.micron.com/about/blog/2023/october/how-to-get-the-worlds-most-advanced-mainstream">7500 SSD</a> and <a href="https://www.mouser.com/datasheet/3/1579/1/6550_ion_nvme_ssd_product_brief.pdf">6550 ION product brief</a>; Open Compute Project, <a href="https://www.opencompute.org/documents/datacenter-nvme-ssd-specification-v2-7-final-pdf-1">Datacenter NVMe SSD Specification 2.7</a>.</li>
+<li>SecurityWeek, <a href="https://www.securityweek.com/intel-tdx-connect-bridges-the-cpu-gpu-security-gap/">Intel TDX Connect bridges the CPU-GPU security gap</a>, March 2025.</li>
+<li>NVIDIA H100 confidential computing: <a href="https://ksayid.github.io/confidential-computing-notes/docs/core/gpu-confidential-computing/">summary notes</a> drawing on Gu et al., <a href="https://arxiv.org/abs/2507.02770">arXiv:2507.02770</a>; <a href="https://docs.nvidia.com/confidential-computing/">NVIDIA Trusted Computing Solutions</a>.</li>
+</ol>
+</section>
+
+<section id="source">
+  <span class="label">Source and licence</span>
+  <h2>About this article</h2>
+  <div class="attrib">
+    <p>Written by Lei Zhou. Text © 2026 Lei Zhou, licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. First published on LinkedIn, 19 April 2026; this is the canonical copy.</p>
+    <p>Product and specification status reflects the sources linked above and moves quickly. Check them before relying on any single claim.</p>
+  </div>
+  <div class="more"><a href="chain-of-time.html">From chain of trust to chain of time</a><a href="https://zlhk100.github.io/hw-security-safety-isolation/article/">Security and Safety by Isolation</a><a href="virtio-hypervisors.html">VirtIO and hypervisors</a><a href="../follow.html">Follow updates</a></div>
+</section>
+
+<section id="discuss">
+  <span class="label">Discussion</span>
+  <h2>Corrections, questions or counter-examples?</h2>
+  <div class="discuss">
+    <p>If a claim here is wrong or out of date, I would like to hear about it. Comments are hosted in GitHub Discussions and need a GitHub account. Nothing loads from a third party until you click.</p>
+    <button type="button" id="load-discussion">Load the discussion</button>
+    <div id="giscus-slot"></div>
+  </div>
+  <div class="more"><a href="../#library">← Back to the library</a></div>
+</section>
+
+</article></div></main>
+
+<footer><div class="wrap">
+  <span>© Lei Zhou · written content CC BY 4.0</span>
+  <span>Cookie-free page counts via <a href="https://www.goatcounter.com/">GoatCounter</a> · <a href="../follow.html">Follow</a></span>
+</div></footer>
+
+<script>
+/* Giscus loads only on request. Fill in GISCUS_REPO_ID and GISCUS_CATEGORY_ID from giscus.app. */
+(function(){
+  var GISCUS_REPO_ID = "";      // e.g. "R_kgDO..."
+  var GISCUS_CATEGORY_ID = "";  // e.g. "DIC_kwDO..."
+  var btn = document.getElementById('load-discussion');
+  var slot = document.getElementById('giscus-slot');
+  if (!GISCUS_REPO_ID || !GISCUS_CATEGORY_ID) {
+    btn.remove();
+    slot.innerHTML = '<p>Discussion opens soon. Meanwhile, email <a href="mailto:zlhk100@gmail.com">zlhk100@gmail.com</a> or open an issue on the <a href="https://github.com/zlhk100/zlhk100.github.io/issues">site repository</a>.</p>';
+    return;
+  }
+  btn.addEventListener('click', function(){
+    var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var s = document.createElement('script');
+    s.src = 'https://giscus.app/client.js';
+    var a = {'data-repo':'zlhk100/zlhk100.github.io','data-repo-id':GISCUS_REPO_ID,
+      'data-category':'Library','data-category-id':GISCUS_CATEGORY_ID,
+      'data-mapping':'pathname','data-strict':'1','data-reactions-enabled':'1',
+      'data-emit-metadata':'0','data-input-position':'top','data-lang':'en','data-loading':'lazy',
+      'data-theme': dark ? 'dark_dimmed' : 'light','crossorigin':'anonymous'};
+    for (var k in a) s.setAttribute(k, a[k]);
+    s.async = true;
+    slot.appendChild(s);
+    btn.remove();
+  });
+})();
+</script>
+<script data-goatcounter="https://zlhk100.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>

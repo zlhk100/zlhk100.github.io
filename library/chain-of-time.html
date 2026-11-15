@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From chain of trust to chain of time — Lei Zhou</title>
+<meta name="description" content="A position paper for Physical AI: access, trust and time contracts at every boundary on a shared SoC, the SPDM/IDE trust chain as a template for a chain of time, where timing breaks hop by hop, and proposals by community.">
+<meta name="author" content="Lei Zhou">
+<link rel="canonical" href="https://zlhk100.github.io/library/chain-of-time.html">
+<link rel="alternate" type="application/atom+xml" title="Lei Zhou — updates" href="../feed.xml">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://zlhk100.github.io/library/chain-of-time.html">
+<meta property="og:title" content="From chain of trust to chain of time">
+<meta property="og:description" content="We know how to build a chain of trust from manufacture to runtime. Physical AI needs a chain of time built the same way. Where it breaks, hop by hop, and what would close it.">
+<meta property="og:image" content="https://zlhk100.github.io/assets/og-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Lei Zhou mark: non-deterministic in, predictable out">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "TechArticle", "headline": "From chain of trust to chain of time", "author": {"@type": "Person", "name": "Lei Zhou", "url": "https://zlhk100.github.io/"}, "copyrightHolder": {"@type": "Person", "name": "Lei Zhou"}, "copyrightYear": 2026, "license": "https://creativecommons.org/licenses/by/4.0/", "about": ["mixed criticality", "Physical AI", "timing analysis", "Logical Execution Time", "SPDM", "VirtIO", "ROS 2"], "datePublished": "2026-11-15", "url": "https://zlhk100.github.io/library/chain-of-time.html"}
+</script>
+<style>
+:root{
+  --bg:#faf7f2; --bg2:#f3ede4; --bg3:#ede5d8; --border:#d6cab8;
+  --text:#3a2e22; --text-dim:#6f604c; --text-head:#1e1610;
+  --accent:#2E3192; --accent2:#B9431B; --accent3:#1F6F9E;
+  --navy:#2E3192; --orange:#F15A29; --sky:#37AFE4;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
+    --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
+    --accent:#9EA1F0; --accent2:#F4825F; --accent3:#62C4EE;
+    --navy:#9EA1F0; --orange:#F4825F; --sky:#62C4EE;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
+  --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
+  --accent:#9EA1F0; --accent2:#F4825F; --accent3:#62C4EE;
+  --navy:#9EA1F0; --orange:#F4825F; --sky:#62C4EE;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16.5px;line-height:1.75}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius:2px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 48px}
+@media (max-width:700px){.wrap{padding:0 16px}}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:block}
+.top{border-bottom:1px solid var(--border);background:var(--bg2)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text-head);font-family:var(--serif);font-weight:700;font-size:18px}
+.brand:hover{text-decoration:none}
+.brand img{width:30px;height:30px;display:block}
+.top nav{display:flex;flex-wrap:wrap;gap:4px 22px;font-family:var(--mono);font-size:13px}
+.top nav a{color:var(--text-dim)}
+.top nav a:hover{color:var(--accent)}
+.hero{background:var(--bg2);border-bottom:1px solid var(--border);padding:56px 0 44px}
+.hero h1{font-family:var(--serif);font-weight:700;font-size:clamp(30px,4.6vw,46px);line-height:1.12;color:var(--text-head);margin:14px 0 0;max-width:24ch}
+.sub{font-size:clamp(17px,2vw,19px);font-weight:300;color:var(--text-head);margin:14px 0 0;max-width:60ch}
+.meta{font-family:var(--mono);font-size:12.5px;color:var(--text-dim);margin-top:14px;letter-spacing:.02em}
+article{max-width:760px;padding:24px 0 40px}
+article section{padding:28px 0 4px;border-bottom:1px solid var(--border)}
+article section:last-of-type{border-bottom:0}
+h2{font-family:var(--serif);font-weight:700;font-size:clamp(22px,2.6vw,27px);line-height:1.25;color:var(--text-head);margin:6px 0 14px}
+article p{margin:0 0 14px}
+article ul{margin:0 0 18px;padding-left:22px}
+article li{margin:0 0 8px}
+article li::marker{color:var(--accent)}
+strong{color:var(--text-head);font-weight:600}
+.callout{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--navy);border-radius:6px;padding:16px 20px;margin:4px 0 20px}
+.callout p{margin:0}
+.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:4px 0 22px}
+.fact{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:15px}
+.fact b{display:block;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent3);margin-bottom:4px}
+@media (max-width:640px){.facts{grid-template-columns:1fr}}
+.tm{overflow-x:auto;margin:4px 0 14px;border:1px solid var(--border);border-radius:6px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14.5px;line-height:1.55}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--border)}
+th{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent3);background:var(--bg2)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600;color:var(--text-head)}
+.more{margin:6px 0 18px;display:flex;flex-wrap:wrap;gap:6px 22px;font-family:var(--mono);font-size:13.5px;font-weight:600}
+.note{font-size:14px;color:var(--text-dim)}
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:28px 0;font-size:13.5px;color:var(--text-dim)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
+article h2{margin-top:6px}
+article code{font-family:var(--mono);font-size:.88em;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:0 4px}
+article em{font-style:italic}
+.tm table{min-width:520px}
+.tm td:first-child{font-weight:600}
+.attrib{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--sky);border-radius:6px;padding:16px 20px;margin:8px 0 20px;font-size:14.5px}
+.attrib p{margin:0 0 6px}.attrib p:last-child{margin:0}
+.discuss{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:20px 22px;margin:8px 0 24px}
+.discuss p{margin:0 0 12px}
+.discuss button{font-family:var(--mono);font-size:13.5px;font-weight:600;color:var(--accent);background:var(--bg);border:1px solid var(--accent);border-radius:4px;padding:8px 14px;cursor:pointer}
+.discuss button:hover{background:var(--bg3)}
+.discuss button:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+
+.toc{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px 20px 8px;margin:26px 0 6px;font-size:15px}
+.toc ol{margin:6px 0 8px;padding-left:22px;columns:2;column-gap:28px}
+.toc li{margin:0 0 4px;break-inside:avoid}
+@media (max-width:640px){.toc ol{columns:1}}
+.fig{margin:10px 0 24px}
+.figbox{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;overflow-x:auto}
+.fig figcaption{font-size:14px;line-height:1.6;color:var(--text-dim);margin-top:8px}
+.dg{display:block;width:100%;height:auto;color:var(--text);font-family:var(--sans)}
+.dg .bx{fill:var(--bg2);stroke:var(--border);stroke-width:1.2}
+.dg .bx2{fill:var(--bg3);stroke:var(--border);stroke-width:1.2}
+.dg .rgb{fill:var(--bg);stroke:var(--border);stroke-dasharray:3 3}
+.dg .rg{fill:none;stroke:var(--border);stroke-width:1.2;stroke-dasharray:5 4}
+.dg .hl{fill:var(--bg3);stroke:var(--accent3);stroke-width:1.5}
+.dg .sel{fill:var(--bg2);stroke:var(--orange);stroke-width:2}
+.dg .cell{fill:var(--bg);stroke:var(--border)}
+.dg .hd{fill:var(--bg3);stroke:var(--border)}
+.dg .act{fill:var(--bg3);stroke:var(--border)}
+.dg .note{fill:var(--bg2);stroke:var(--border);stroke-dasharray:4 3}
+.dg .pill{fill:var(--bg);stroke:var(--border)}
+.dg .life{stroke:var(--border);stroke-width:1.2;stroke-dasharray:3 4}
+.dg .sep{stroke:var(--border);stroke-width:1;stroke-dasharray:2 4}
+.dg text{dominant-baseline:auto}
+.dg .t{fill:var(--text-head);font-size:12px}
+.dg .th{fill:var(--text-head);font-size:12px;font-weight:600}
+.dg .ta,.dg .tn{fill:var(--text);font-size:11.5px}
+.dg .tp{fill:var(--text-dim);font-size:11px;font-family:var(--mono)}
+.dg .tm{fill:var(--text);font-size:10.5px;font-family:var(--mono)}
+.dg .tl{fill:var(--text-dim);font-size:11px}
+.dg .lt{fill:var(--text);font-size:11px}
+.dg .tt{fill:var(--accent);font-size:11px;font-family:var(--mono);font-weight:600;letter-spacing:.06em}
+.dg .ln{fill:none;stroke:currentColor;stroke-width:1.3}
+.dg .lo{fill:none;stroke:var(--orange);stroke-width:1.7}
+.dg .ld{fill:none;stroke:currentColor;stroke-width:1.2;stroke-dasharray:5 4}
+.dg .tx{fill:var(--orange);font-size:16px;font-weight:600}
+.dg .mk{fill:currentColor}.dg .mko{fill:var(--orange)}
+.refs{font-size:14.5px}.refs li{margin:0 0 6px}
+article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--text-head);margin:22px 0 10px}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap">
+  <a class="brand" href="../"><img src="../assets/mark.svg" alt="" width="30" height="30">Lei Zhou</a>
+  <nav aria-label="Site">
+    <a href="../#work">Work</a><a href="../#research">Research</a><a href="../#library">Library</a><a href="../#talks">Talks</a><a href="../#contact">Contact</a>
+  </nav>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <span class="label">Library · Position paper</span>
+  <h1>From chain of trust to chain of time</h1>
+  <p class="sub">Physical AI runs non-deterministic workloads on the same silicon as real-time control. We have learned to build a verifiable chain of trust from manufacture to runtime. The equivalent chain for time, covering how long each step may take and how much of a shared resource it may use, barely exists. This paper sets out where it breaks and what would close it.</p>
+  <div class="meta">Lei Zhou · position paper · 15 November 2026 · about 20 minutes</div>
+</div></header>
+
+<main><div class="wrap"><article>
+
+<div class="callout" style="margin-top:26px"><p><strong>Status.</strong> This is an argument and a set of proposals, not a results paper. Statements about existing standards, products and research are referenced. Proposals are labelled as proposals. The MCIB benchmark mentioned in section 8 has not yet produced measurements.</p></div>
+
+<nav class="toc" aria-label="Contents">
+  <span class="label">Contents</span>
+  <ol>
+    <li><a href="#problem">The problem: no contract about interference</a></li>
+    <li><a href="#three">Three contracts, one pattern</a></li>
+    <li><a href="#template">The chain of trust as a template</a></li>
+    <li><a href="#adds-up">Why time is harder: it adds up</a></li>
+    <li><a href="#hops">Where the chain of time breaks today</a></li>
+    <li><a href="#robotics">The trust chain has gaps too</a></li>
+    <li><a href="#close">What would close it</a></li>
+    <li><a href="#mcib">Where MCIB fits</a></li>
+    <li><a href="#open">Open problems</a></li>
+    <li><a href="#references">References</a></li>
+  </ol>
+</nav>
+
+<section>
+<h2 id="problem">1. The problem: no contract about interference</h2>
+<p>A robot or vehicle that runs learned perception beside safety-relevant control on one system-on-chip is running two workloads with incompatible characteristics. Inference is bursty, memory-hungry and best-effort. Control is small, periodic and has a hard deadline. They contend for last-level cache, memory bandwidth, the interconnect, interrupt delivery, the hypervisor's scheduler and, increasingly, the accelerator itself.</p>
+<p>As the <a href="mixed-criticality-primer.html">mixed-criticality primer</a> puts it, the failure is not that the model is inaccurate. It is that the platform underneath both workloads has no contract about interference.</p>
+<p>That sentence understates the problem in one respect. A sensor-to-actuator path does not cross one boundary. It crosses many: a field network, a device-virtualisation backend, a hypervisor, a shared memory hierarchy, a middleware layer, an executor, an accelerator queue, and back out again. A principle that holds across firmware, protocols and IPC applies to each of them: <strong>at every domain boundary, make the contract explicit, formal and machine-readable.</strong> Most of the boundaries on that path have no timing contract at all.</p>
+</section>
+
+<section>
+<h2 id="three">2. Three contracts, one pattern</h2>
+<p>Every boundary on a shared platform needs an answer along three dimensions.</p>
+<div class="tm"><table>
+<thead><tr><th>Dimension</th><th>The question</th><th>Mature mechanisms</th><th>State</th></tr></thead>
+<tbody>
+<tr><td>Access</td><td>Who is allowed to touch what, and what happens when they shouldn't?</td><td>SMMU stage 2, TZASC, MPC/PPC, vendor equivalents</td><td>Mature; the remaining errors are mostly configuration</td></tr>
+<tr><td>Trust</td><td>Is this component what it claims to be, running what it claims to run?</td><td>DICE, SPDM, PCIe/CXL IDE, TDISP</td><td>In production in data centres; uneven elsewhere (section 6)</td></tr>
+<tr><td>Time</td><td>How long may this step take, and how much of a shared resource may it use?</td><td>TSN at the network edge; LET inside some ECUs</td><td>Islands only; no end-to-end chain</td></tr>
+</tbody></table></div>
+<p>The access row is the subject of <a href="https://zlhk100.github.io/hw-security-safety-isolation/article/">Security and Safety by Isolation</a>, which reduces every hardware protection mechanism to one form: initiator identity × target resource → access policy. The same article treats MPAM as the temporal half of freedom from interference, using the same form with a partition ID, cache ways or DRAM bandwidth, and a cap. The trust row is the subject of <a href="spdm-ide-trust-chain.html">From specification to silicon</a>. This paper is about the third row.</p>
+<p>The three dimensions share three requirements. Each contract must be <strong>enforced at the target</strong>, because an initiator cannot be trusted to police itself. Each must be <strong>locked before untrusted software runs</strong>, because a configuration that untrusted code can change is a convention, not a guarantee. And each must be <strong>evidenced by something other than the system being judged</strong>.</p>
+<p>They also map onto the three questions that safety and security share. <em>Is the system intact?</em> is a trust question. <em>Is it behaving as intended?</em> is an access and time question. <em>Can it recover to a safe, secure state when it isn't?</em> is what each contract's miss handler is for.</p>
+</section>
+
+<section>
+<h2 id="template">3. The chain of trust as a template</h2>
+<p>The trust chain is worth studying not because timing is a security problem, but because it is the best worked example of how an industry turned an implicit assumption into a verifiable property. It has five steps, and two composition rules.</p>
+<p>The steps run from manufacture to runtime: a hardware-rooted identity provisioned once; measured boot, which records what actually started; attestation, in which a relying party checks identity and measurements before admitting the device; runtime enforcement, in which IDE protects every transaction afterwards; and, still open, continuity, re-checking during a workload's lifetime rather than only at admission.</p>
+<p>The composition rules matter more than the steps. First, <strong>admission and enforcement are only meaningful together</strong>: IDE without SPDM attestation is encryption without verified identity. Second, <strong>the chain is bounded by its weakest link</strong>: a platform's security posture is bounded by its least-attested component.</p>
+<p>Proposal: build the chain of time with the same structure.</p>
+<div class="tm"><table>
+<thead><tr><th>Step</th><th>Chain of trust (exists)</th><th>Chain of time (proposed)</th></tr></thead>
+<tbody>
+<tr><td>Identity</td><td>DICE identity provisioned at manufacture</td><td>A declared timing contract per workload and per hop: demand envelope, burst profile, worst-case latency</td></tr>
+<tr><td>Measured boot</td><td>Each firmware stage measured as it starts</td><td>The partitioning configuration that bounds interference (cache and bandwidth partitions, SMMU stage 2, network gate schedules, core pinning) locked, then measured</td></tr>
+<tr><td>Admission</td><td>SPDM attestation before a device is trusted</td><td>A critical workload admitted only once that locked configuration has been verified</td></tr>
+<tr><td>Enforcement</td><td>IDE on every transaction</td><td>Budgets enforced at the source: bandwidth regulation, time-aware gates, bounded execution windows</td></tr>
+<tr><td>Continuity</td><td>Runtime re-attestation (open problem)</td><td>Runtime overrun detection that leads to a defined safe state (open problem)</td></tr>
+</tbody></table></div>
+<p>The first composition rule carries over directly. A budget without verified configuration is a budget nobody can check; a verified configuration without enforcement is a measurement, not a guarantee; and a deadline monitor without either is an alarm. The second rule does not carry over, and that is the subject of the next section.</p>
+</section>
+
+<section>
+<h2 id="adds-up">4. Why time is harder: it adds up</h2>
+<p>Security fails at the weakest link. Timing fails at the sum. The end-to-end latency of a sensor-to-actuator path is bounded only if every hop on it is bounded, and the bound is the composition of all of them. A strong hop does not compensate for a weak one, and one unbounded hop makes the whole path unbounded.</p>
+<p>That has two consequences that a trust chain does not face.</p>
+<ul>
+<li><strong>Budgets must be enforced at the source.</strong> In a trust chain, a compromised component damages its own trustworthiness. In a time chain, an unpoliced aggressor consumes shared cache, bandwidth or accelerator time and breaks the bounds of components it never touches. A budget that the aggressor is trusted to respect is not a budget.</li>
+<li><strong>Hop boundaries must compose.</strong> If each hop's output appears whenever that hop happens to finish, every scheduling change upstream moves the timing of everything downstream, and end-to-end analysis has to be redone. The Logical Execution Time (LET) model, which originated with time-triggered programming and is now used in automotive software, fixes this by making each task read its inputs at the start of a fixed window and publish its outputs at the end, whatever happens inside. Communication then occurs only at fixed points, which gives deterministic timing and data flow and lets tasks compose without re-analysis. Network hops can be modelled the same way, as windows sized to the worst-case transmission time.</li>
+</ul>
+<p>LET has a cost: outputs appear at the end of the window even when the work finished early, which lengthens end-to-end latency, and current research reduces that pessimism using knowledge of the schedule. Its value is that it is the timing equivalent of a well-defined trust boundary. An overrun is detectable at exactly one point, the window end.</p>
+</section>
+
+<section>
+<h2 id="hops">5. Where the chain of time breaks today</h2>
+<p>Following a sensor sample through a consolidated platform, hop by hop, shows where timing is enforced, where it is only detected, and where nothing bounds it by design. The last column gives the nearest layer in the MCIB interference-channel taxonomy: the hop says <em>where</em> time is lost, the layer says <em>why</em>.</p>
+<div class="tm"><table>
+<thead><tr><th>Hop</th><th>What exists</th><th>Status</th><th>MCIB layer</th></tr></thead>
+<tbody>
+<tr><td>Field network</td><td>TSN: IEEE 802.1AS shared time, 802.1Qbv time-aware gates; cyclic fieldbuses such as EtherCAT</td><td>Enforced, when configured</td><td>Outside the SoC; not in MCIB's scope</td></tr>
+<tr><td>Device-virtualisation backend</td><td>The VIRTIO specification defines features, configuration, virtqueues and notifications, not deadlines or timestamps. On Linux, vhost worker threads run in the time-sharing class by default. Real-time prototypes exist for ACRN and Jailhouse.</td><td>Not bounded by design</td><td><code>sw.hypervisor</code></td></tr>
+<tr><td>Hypervisor dispatch</td><td>vCPU wait time and VM-exit handling add to every path; static partitioning reduces both</td><td>Bounded only by configuration</td><td><code>sw.hypervisor</code></td></tr>
+<tr><td>Shared memory hierarchy</td><td>Cache and bandwidth contention sit below what the hypervisor can see. Arm MPAM and cache colouring can partition them, but MPAM details are largely implementation-defined.</td><td>Partially enforceable</td><td><code>hw.cache</code>, <code>hw.mem</code>, <code>hw.interconnect</code></td></tr>
+<tr><td>Middleware</td><td>DDS deadline and liveliness QoS notify both sides when a stream misses its expected interval or goes silent</td><td>Detected, not enforced</td><td>Nearest: <code>sw.runtime</code></td></tr>
+<tr><td>Executor</td><td>The default ROS 2 scheduling is not aware of chain criticality; research schedulers such as PiCAS add chain priority and analysable bounds</td><td>Not bounded by default</td><td><code>sw.os</code>, <code>sw.runtime</code></td></tr>
+<tr><td>Accelerator</td><td>Most accelerators run work sequentially, without preemption or concurrent execution; research frameworks such as PAAM schedule requests by chain priority</td><td>Not bounded by default</td><td><code>hw.accel</code> (proposed in MCIB spec v1.4)</td></tr>
+</tbody></table></div>
+<p>Three observations follow.</p>
+<ul>
+<li><strong>Only the edges are enforced.</strong> The field network is the best-behaved hop. Inside the SoC, where the inference and the control loop actually meet, timing is detected at best.</li>
+<li><strong>Detection is often mistaken for enforcement.</strong> A deadline callback reports a miss after it has happened. It is the timing equivalent of an intrusion alarm: necessary, and no substitute for a lock.</li>
+<li><strong>The accelerator is the least-contracted hop and the most important one for Physical AI</strong>, because perception and vision-language-action inference run there.</li>
+</ul>
+<p>Each loose hop has research that bounds it in isolation. What none of them has is a contract that carries across to the next hop.</p>
+</section>
+
+<section>
+<h2 id="robotics">6. The trust chain has gaps too</h2>
+<p>The trust row of the table in section 2 is not uniformly mature either, and the picture differs by domain.</p>
+<p><strong>Automotive sensors now have a standard path.</strong> The MIPI Camera Security Framework, released in 2024, uses DMTF SPDM to authenticate image sensors and the SerDes bridges that connect them to an ECU, and adds integrity protection and optional encryption of the image stream. It was motivated by UN R155, which lists manipulation of sensor data among in-vehicle vulnerabilities. A command-and-control companion specification followed in December 2025, and security IP implementing the framework was announced in 2026. I have not found evidence of production vehicles shipping it yet.</p>
+<p><strong>Robotics has no native equivalent that I could find.</strong> ROS 2 security, through SROS 2 and DDS-Security, authenticates and authorises software participants and encrypts topics. As a 2026 analysis points out, those guarantees apply once messages enter the protected stack; they do not establish whether the published data reflects the robot's physical state. Hardware attestation of robot nodes appears in research and in component-level authenticator chips, not in a robotics standard. The MIPI framework states that it can also apply to industrial uses of the same camera interface, so robot cameras have a route even though robotics did not create it.</p>
+<p>The two dimensions meet at this point. A sample can be authentic and stale. It can be fresh and from a tampered sensor. A control loop needs both properties, and today they are checked, where they are checked at all, by unrelated mechanisms.</p>
+</section>
+
+<section>
+<h2 id="close">7. What would close it</h2>
+<p>All of the following are proposals.</p>
+<h3 class="h3">Five building blocks</h3>
+<ul>
+<li><strong>Declared timing contracts.</strong> Each workload and each hop declares its demand and its bound in machine-readable form: memory footprint, bandwidth envelope, burst profile, worst-case latency split into floor and tail. MCIB's specification already defines such a format as its Timing Manifest profile, with contracts derived from measurement and validated by replay, and per-device-class contracts for virtualised device paths.</li>
+<li><strong>Enforcement at the source.</strong> Every declared budget is backed by a mechanism that limits the aggressor, not by the victim's hope: bandwidth regulation and cache partitioning, time-aware gates, accelerator arbitration with priority and bounded preemption.</li>
+<li><strong>Composable boundaries.</strong> LET-style windows at hop boundaries, so that end-to-end latency is a sum of fixed windows that can be analysed in advance, rather than a property discovered by measurement.</li>
+<li><strong>Attest the lock.</strong> The configuration that bounds interference is locked at boot, then measured and reported the way firmware is. This reuses machinery that already exists: SPDM already defines measurement types for hardware configuration and firmware configuration as well as for code (<a href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0274_1.1.0b.pdf">DSP0274</a>, section 7.10.1.1). It is integrity evidence that the intended configuration is in force. It is not, on its own, evidence that deadlines are met.</li>
+<li><strong>Runtime continuity.</strong> Overrun detection at window boundaries, tied to a defined reaction: degrade, fall back or reach a safe state.</li>
+</ul>
+<h3 class="h3">Who could act on what</h3>
+<div class="tm"><table>
+<thead><tr><th>Community</th><th>Proposal</th></tr></thead>
+<tbody>
+<tr><td>OASIS VIRTIO TC, virtio-msg work</td><td>Register-based transports cannot carry time; messages can. While the message-based transport is still being standardised, consider optional timing metadata (capture timestamp, deadline or window identifier) and, for sensor-class devices, a latest-value semantic alongside the in-order queue. Both need checking against current drafts before being raised.</td></tr>
+<tr><td>SOAFEE and platform integrators</td><td>Express mixed-criticality platform requirements as per-hop timing contracts, with the enforcing mechanism named for each hop, rather than as a single end-to-end latency figure.</td></tr>
+<tr><td>ROS 2 Real-Time WG and DDS vendors</td><td>Pair each deadline QoS with an enforced budget in a lower layer, and make chain criticality visible to the executor and to accelerator access.</td></tr>
+<tr><td>DMTF and TCG</td><td>Define how a platform reports its locked partitioning configuration as attestation evidence, alongside firmware measurements.</td></tr>
+<tr><td>Robotics platform vendors</td><td>Adopt existing sensor authentication (for example the MIPI framework for cameras) instead of creating robotics-specific schemes.</td></tr>
+</tbody></table></div>
+</section>
+
+<section>
+<h2 id="mcib">8. Where MCIB fits</h2>
+<p><a href="https://github.com/zlhk100/physical-ai-mixed-criticality">MCIB</a>, the Mixed-Criticality Interference Benchmark, is the evidence side of the time chain. Its loop is profile → attribute → countermeasure, and each attributed outlier ends in a verdict: <code>tune</code> (configuration removes it), <code>partition</code> (a named isolation mechanism bounds it) or <code>ceiling</code> (a structural limit to design around). In the terms of this paper, attribution tells you which hop broke its contract and why, and the verdict tells you whether that hop's contract can be enforced at all.</p>
+<p>Its method fits the third shared requirement in section 2, evidence that does not come from the system being judged: it measures the victim, toggles the aggressor and attributes the difference, using hardware counters as corroboration where the silicon exposes them.</p>
+<p>Its current state is stated plainly in its repository. It has produced no measurements yet; its harness has been validated on a Raspberry Pi 4B under PREEMPT_RT; the specification, taxonomy and results schema are published; the first campaign is planned on Renesas R-Car V4H, and an accelerator time-sharing campaign is in outline. Its output is structured interference characterisation data that a qualified assessor may use as input to a safety argument. It is not qualified safety evidence.</p>
+</section>
+
+<section>
+<h2 id="open">9. Open problems</h2>
+<ul>
+<li><strong>Continuity, in both chains.</strong> Trust is mostly verified at admission, and time is mostly verified at design. Neither has a standard way to keep checking during operation.</li>
+<li><strong>Accelerators.</strong> Without bounded preemption or arbitration on the accelerator, no contract above it can be enforced. The software can only measure the consequences.</li>
+<li><strong>Composition across the SoC and the network.</strong> TSN bounds the wire and LET bounds tasks; joining them through virtualised devices and middleware into one analysable path is not yet standard practice.</li>
+<li><strong>Formats.</strong> There is no agreed machine-readable form for a timing contract, or for reporting partitioning configuration as attestation evidence.</li>
+<li><strong>Freshness against completeness.</strong> Device and storage protocols are built so that nothing is lost. Control loops need the latest value, not every value. Contracts need a way to say which.</li>
+</ul>
+<p>None of this promises that nothing will go wrong. It aims at something more useful: knowing where timing can go wrong, containing it, and holding evidence that does not come from the system being judged.</p>
+</section>
+
+<section>
+<h2 id="references">References</h2>
+<ol class="refs">
+<li>Lei Zhou, <a href="mixed-criticality-primer.html">Mixed-criticality on shared silicon: a primer for Physical AI</a>; <a href="virtio-hypervisors.html">VirtIO and hypervisors</a>; <a href="https://zlhk100.github.io/hw-security-safety-isolation/article/">Security and Safety by Isolation</a>; <a href="spdm-ide-trust-chain.html">From specification to silicon: the SPDM/IDE trust chain</a>.</li>
+<li>L. Maia and G. Fohler, <a href="https://arxiv.org/abs/2305.02121">Reducing end-to-end latencies of multi-rate cause-effect chains for the LET model</a>; J. Martinez, I. Sañudo and M. Bertogna, <a href="https://hipert.unimore.it/people/marko/papers/TCAD18.pdf">Analytical characterization of end-to-end communication delays with Logical Execution Time</a>, IEEE TCAD.</li>
+<li>OASIS, <a href="https://docs.oasis-open.org/virtio/virtio/v1.4/virtio-v1.4.html">Virtual I/O Device (VIRTIO) Version 1.4</a>; Linaro, <a href="https://www.linaro.org/blog/what-is-virtio-msg-a-message-based-virtio-transport-for-heterogeneous-systems">What is virtio-msg?</a></li>
+<li>Linaro, <a href="https://www.linaro.org/blog/network-latency-with-time-sensitive-networking-on-virtual-machine/">Network latency with Time Sensitive Networking on a virtual machine</a> (vhost thread scheduling class).</li>
+<li><a href="https://arxiv.org/pdf/2610.17899">Towards virtual networking for a time-triggered hypervisor</a> (time-triggered virtio-net on ACRN); G. Schwäricke et al., <a href="https://open.bu.edu/bitstream/handle/2144/44970/Memvpconn.pdf?sequence=1">A real-time virtio-based framework for predictable inter-VM communication</a>, RTSS 2021; <a href="https://arxiv.org/pdf/2105.03374">Clock synchronization in virtualized distributed real-time systems using IEEE 802.1AS and ACRN</a>.</li>
+<li>Promwad, <a href="https://promwad.com/news/mixed-criticality-scheduling-asil-d-qos-multimedia-shared-cores">Mixed-criticality scheduling on shared SoCs</a>; <a href="https://www.irit.fr/TRACES/site/wp-content/uploads/2023/06/MPAM.pdf">Arm MPAM overview</a> (IRIT TRACES); A. Oliveira et al., <a href="https://arxiv.org/html/2502.02437v1">H-MBR: hypervisor-level memory bandwidth reservation</a>.</li>
+<li>Mouser, <a href="https://automationresources.mouser.com/networking/how-tsn-brings-deterministic-timing-industrial-ethernet">How TSN brings deterministic timing to industrial Ethernet</a>.</li>
+<li><a href="https://csi-dgist.github.io/QoS-Guard/QoS/">DDS QoS policies</a> (deadline and liveliness); RTI, <a href="https://community.rti.com/node/6945">Recognizing communication patterns</a>.</li>
+<li>H. Choi, Y. Xiang and H. Kim, <a href="https://par.nsf.gov/servlets/purl/10276465">PiCAS: priority-driven chain-aware scheduling for ROS 2</a>, RTAS 2021; <a href="https://intra.ece.ucr.edu/~hyoseung/pdf/RTAS_2024_PAAM-CR_slides.pdf">PAAM: priority-driven accelerator access management</a>, RTAS 2024.</li>
+<li>MIPI Alliance, <a href="https://mipi.org/articles/camera-security-framework-addresses-regulatory-requirements">Camera Security Framework addresses regulatory requirements</a>; <a href="https://www.edge-ai-vision.com/?p=56797">What's new in MIPI security: CCISE</a>; Synopsys, <a href="https://www.synopsys.com/articles/securing-camera-data-mipi-cse2.html">MIPI CSE 2.0 security solution</a>.</li>
+<li>ROS 2 design, <a href="https://design.ros2.org/articles/ros2_dds_security.html">ROS 2 DDS-Security integration</a>; <a href="https://arxiv.org/pdf/2609.08280">Seeing is not believing: breaking the physical-to-digital trust boundary in robotics</a> (2026); <a href="https://arxiv.org/pdf/1904.09179">Credential masquerading and OpenSSL Spy: exploring ROS 2 using DDS security</a> (2019).</li>
+<li>MCIB, <a href="https://github.com/zlhk100/physical-ai-mixed-criticality">repository and specification</a>.</li>
+</ol>
+</section>
+
+<section id="source">
+  <span class="label">Source and licence</span>
+  <h2>About this paper</h2>
+  <div class="attrib">
+    <p>Written by Lei Zhou. Text © 2026 Lei Zhou, licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</p>
+    <p>Standards and research status reflects the sources linked above as of November 2026. The proposals are the author's and are offered for argument.</p>
+  </div>
+  <div class="more"><a href="spdm-ide-trust-chain.html">The SPDM/IDE trust chain</a><a href="mixed-criticality-primer.html">Mixed-criticality primer</a><a href="virtio-hypervisors.html">VirtIO and hypervisors</a><a href="https://zlhk100.github.io/hw-security-safety-isolation/article/">Security and Safety by Isolation</a><a href="../follow.html">Follow updates</a></div>
+</section>
+
+<section id="discuss">
+  <span class="label">Discussion</span>
+  <h2>Disagree, or have data?</h2>
+  <div class="discuss">
+    <p>If you have measured a hop that confirms or contradicts the table in section 5, or know of a standard I have missed, I would like to hear about it. Comments are hosted in GitHub Discussions and need a GitHub account. Nothing loads from a third party until you click.</p>
+    <button type="button" id="load-discussion">Load the discussion</button>
+    <div id="giscus-slot"></div>
+  </div>
+  <div class="more"><a href="../#library">← Back to the library</a></div>
+</section>
+
+</article></div></main>
+
+<footer><div class="wrap">
+  <span>© Lei Zhou · written content CC BY 4.0</span>
+  <span>Cookie-free page counts via <a href="https://www.goatcounter.com/">GoatCounter</a> · <a href="../follow.html">Follow</a></span>
+</div></footer>
+
+<script>
+/* Giscus loads only on request. Fill in GISCUS_REPO_ID and GISCUS_CATEGORY_ID from giscus.app. */
+(function(){
+  var GISCUS_REPO_ID = "";      // e.g. "R_kgDO..."
+  var GISCUS_CATEGORY_ID = "";  // e.g. "DIC_kwDO..."
+  var btn = document.getElementById('load-discussion');
+  var slot = document.getElementById('giscus-slot');
+  if (!GISCUS_REPO_ID || !GISCUS_CATEGORY_ID) {
+    btn.remove();
+    slot.innerHTML = '<p>Discussion opens soon. Meanwhile, email <a href="mailto:zlhk100@gmail.com">zlhk100@gmail.com</a> or open an issue on the <a href="https://github.com/zlhk100/zlhk100.github.io/issues">site repository</a>.</p>';
+    return;
+  }
+  btn.addEventListener('click', function(){
+    var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var s = document.createElement('script');
+    s.src = 'https://giscus.app/client.js';
+    var a = {'data-repo':'zlhk100/zlhk100.github.io','data-repo-id':GISCUS_REPO_ID,
+      'data-category':'Library','data-category-id':GISCUS_CATEGORY_ID,
+      'data-mapping':'pathname','data-strict':'1','data-reactions-enabled':'1',
+      'data-emit-metadata':'0','data-input-position':'top','data-lang':'en','data-loading':'lazy',
+      'data-theme': dark ? 'dark_dimmed' : 'light','crossorigin':'anonymous'};
+    for (var k in a) s.setAttribute(k, a[k]);
+    s.async = true;
+    slot.appendChild(s);
+    btn.remove();
+  });
+})();
+</script>
+<script data-goatcounter="https://zlhk100.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
