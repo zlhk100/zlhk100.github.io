@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GPU virtualisation for a software-defined vehicle cockpit — Lei Zhou</title>
+<meta name="description" content="Case study: moving an Android Automotive guest from virgl to gfxstream with Vulkan, GLES through ANGLE and zero-copy rendering from guest memory, then optimising it to the customer's performance targets.">
+<meta name="author" content="Lei Zhou">
+<link rel="canonical" href="https://zlhk100.github.io/work/gpu-virtualisation-cockpit.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://zlhk100.github.io/work/gpu-virtualisation-cockpit.html">
+<meta property="og:title" content="GPU virtualisation for a software-defined vehicle cockpit — case study">
+<meta property="og:description" content="From virgl to gfxstream: Vulkan, GLES through ANGLE and zero-copy rendering from guest memory on an Arm automotive SoC, optimised to the customer's targets.">
+<meta property="og:image" content="https://zlhk100.github.io/assets/og-gpu-virtualisation-cockpit.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Title card: GPU virtualisation for a vehicle cockpit. virgl to gfxstream, zero-copy rendering from guest memory, optimised to target">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" type="application/atom+xml" title="Lei Zhou — updates" href="../feed.xml">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf7f2; --bg2:#f3ede4; --bg3:#ede5d8; --border:#d6cab8;
+  --text:#3a2e22; --text-dim:#6f604c; --text-head:#1e1610;
+  --accent:#2E3192; --accent2:#B9431B; --accent3:#1F6F9E;
+  --navy:#2E3192; --orange:#F15A29; --sky:#37AFE4;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
+    --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
+    --accent:#9EA1F0; --accent2:#F4825F; --accent3:#62C4EE;
+    --navy:#9EA1F0; --orange:#F4825F; --sky:#62C4EE;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
+  --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
+  --accent:#9EA1F0; --accent2:#F4825F; --accent3:#62C4EE;
+  --navy:#9EA1F0; --orange:#F4825F; --sky:#62C4EE;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16.5px;line-height:1.75}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius:2px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 48px}
+@media (max-width:700px){.wrap{padding:0 16px}}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:block}
+.top{border-bottom:1px solid var(--border);background:var(--bg2)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text-head);font-family:var(--serif);font-weight:700;font-size:18px}
+.brand:hover{text-decoration:none}
+.brand img{width:30px;height:30px;display:block}
+.top nav{display:flex;flex-wrap:wrap;gap:4px 22px;font-family:var(--mono);font-size:13px}
+.top nav a{color:var(--text-dim)}
+.top nav a:hover{color:var(--accent)}
+.hero{background:var(--bg2);border-bottom:1px solid var(--border);padding:56px 0 44px}
+.hero h1{font-family:var(--serif);font-weight:700;font-size:clamp(30px,4.6vw,46px);line-height:1.12;color:var(--text-head);margin:14px 0 0;max-width:24ch}
+.sub{font-size:clamp(17px,2vw,19px);font-weight:300;color:var(--text-head);margin:14px 0 0;max-width:60ch}
+.meta{font-family:var(--mono);font-size:12.5px;color:var(--text-dim);margin-top:14px;letter-spacing:.02em}
+article{max-width:760px;padding:24px 0 40px}
+article section{padding:28px 0 4px;border-bottom:1px solid var(--border)}
+article section:last-of-type{border-bottom:0}
+h2{font-family:var(--serif);font-weight:700;font-size:clamp(22px,2.6vw,27px);line-height:1.25;color:var(--text-head);margin:6px 0 14px}
+article p{margin:0 0 14px}
+article ul{margin:0 0 18px;padding-left:22px}
+article li{margin:0 0 8px}
+article li::marker{color:var(--accent)}
+strong{color:var(--text-head);font-weight:600}
+.callout{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--navy);border-radius:6px;padding:16px 20px;margin:4px 0 20px}
+.callout p{margin:0}
+.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:4px 0 22px}
+.fact{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:15px}
+.fact b{display:block;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent3);margin-bottom:4px}
+@media (max-width:640px){.facts{grid-template-columns:1fr}}
+.tm{overflow-x:auto;margin:4px 0 14px;border:1px solid var(--border);border-radius:6px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14.5px;line-height:1.55}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--border)}
+th{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent3);background:var(--bg2)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600;color:var(--text-head)}
+.more{margin:6px 0 18px;display:flex;flex-wrap:wrap;gap:6px 22px;font-family:var(--mono);font-size:13.5px;font-weight:600}
+.note{font-size:14px;color:var(--text-dim)}
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:28px 0;font-size:13.5px;color:var(--text-dim)}
+footer a{color:var(--text-dim);text-decoration:underline;text-underline-offset:3px}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap">
+  <a class="brand" href="../"><img src="../assets/mark.svg" alt="" width="30" height="30">Lei Zhou</a>
+  <nav aria-label="Site">
+    <a href="../#work">Work</a><a href="../#research">Research</a><a href="../#library">Library</a><a href="../#talks">Talks</a><a href="../#contact">Contact</a>
+  </nav>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <span class="label">Case study · Mixed-criticality and virtualisation</span>
+  <h1>GPU virtualisation for a software-defined vehicle cockpit</h1>
+  <p class="sub">Moving an Android Automotive guest from virgl to gfxstream, with Vulkan, GLES through ANGLE and zero-copy rendering from guest memory, then optimising it to the customer’s performance targets.</p>
+  <div class="meta">Linaro · technical delivery lead and architect</div>
+</div></header>
+
+<main><div class="wrap"><article>
+
+<section>
+  <span class="label">Context</span>
+  <h2>Two criticality levels, one GPU</h2>
+  <p>Any platform that runs a critical workload beside a general-purpose operating system on one GPU meets this problem: a vehicle cockpit, a robot whose control stack shares the GPU with perception and a user interface, or an edge AI system beside its control software. Here it was a cockpit.</p>
+  <p>The platform is an Arm automotive SoC running a type-1 hypervisor. In the product architecture, the instrument cluster, whose functions are safety-relevant, renders on the host, and the infotainment system is an Android Automotive guest that reaches the same GPU through virtio-gpu. The GPU has no hardware virtualisation isolation, so any separation between the two has to come from software.</p>
+  <p>The guest’s graphics ran on virgl, and the guest had only software Vulkan. The target was gfxstream: the guest’s Vulkan and GLES calls streamed to a renderer on the host, with hardware Vulkan in the guest.</p>
+</section>
+
+<section>
+  <span class="label">The challenge</span>
+  <h2>Three constraints that the textbook design does not meet</h2>
+  <ul>
+    <li><strong>Compatibility at the boundaries.</strong> The guest’s Android release was fixed: it was the customer’s functioning production guest, built from an older AOSP release, and moving it to a newer release would have brought BSP bring-up work with it. The VMM’s renderer binding was written for a newer renderer interface, and the renderer that matches the older guest and the newer renderer come from different release lines. Whether any renderer could serve both sides was the main design risk.</li>
+    <li><strong>No runtime memory sharing.</strong> This hypervisor stack cannot map host memory into a guest at runtime. gfxstream’s shared memory (its command ring, host-visible Vulkan memory and host-allocated buffers) assumes exactly that.</li>
+    <li><strong>Performance targets.</strong> The customer set targets for virtualisation loss against host-native rendering and for the host CPU spent on GPU virtualisation. The Vulkan zero-copy path also had to work on both the proprietary and the open-source host GPU driver.</li>
+  </ul>
+</section>
+
+<section>
+  <span class="label">My role</span>
+  <h2>Architecture, then delivery</h2>
+  <p>I was the technical delivery lead and architect, and I owned both the migration and the performance optimisation through to delivery. That included the migration architecture: the compatibility strategy at each boundary and the zero-copy memory design.</p>
+</section>
+
+<section>
+  <span class="label">The approach</span>
+  <h2>Read the contracts before building across them</h2>
+  <ul>
+    <li><strong>Each boundary checked from source first.</strong> The renderer interface entry point by entry point, with struct layouts on the target architecture; the guest protocol by opcode table, handshake, capability fields and extension allowlists.</li>
+    <li><strong>Every decision recorded with its rejected alternatives</strong> and the conditions that would re-open it.</li>
+    <li><strong>Function before performance.</strong> The whole functional chain was proven end to end before optimisation started, so the riskiest unknowns surfaced first and each step changed one variable.</li>
+    <li><strong>Optimisation by attribution.</strong> Per-frame ledgers that sum to the measured frame time, a predicted counter for every theory, and keep-or-drop rules written before the data.</li>
+  </ul>
+</section>
+
+<section>
+  <span class="label">Managing risk</span>
+  <h2>Each major risk had a named mitigation before work depended on it</h2>
+  <div class="tm"><table>
+    <thead><tr><th>Risk</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>No renderer serves both the production guest and the VMM</td><td>Both contracts compared from source before building; a compatibility adapter designed and held as the fallback; the conditions that would re-open the decision written down with it</td></tr>
+      <tr><td>The platform cannot share host memory with the guest</td><td>Sharing reversed to guest-owned memory; runtime sharing in the hypervisor recorded as the long-term recommendation</td></tr>
+      <tr><td>The biggest unknowns surface last</td><td>Coherency, decode coverage and the memory budget investigated early, in parallel with the critical path; function proven end to end before optimisation</td></tr>
+      <tr><td>A protocol change hangs the guest</td><td>Feature negotiation, mixed old and new versions on each side, and a targeted stress test before the change was kept</td></tr>
+      <tr><td>An optimisation that only appears to help</td><td>A predicted counter for each theory and a keep-or-drop rule written before the data</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <span class="label">What we built</span>
+  <h2>A gfxstream path that fits the platform</h2>
+  <ul>
+    <li><strong>A renderer that serves both contracts.</strong> A newer renderer release that matches the VMM’s interface and decodes every call the production guest can reach, so the guest stayed on its release, with changes confined to its graphics libraries and kernel. A compatibility adapter was designed and kept as the documented fallback.</li>
+    <li><strong>Zero copy from guest memory.</strong> The guest allocates graphics memory; the VMM exports those pages as a dma-buf; the host GPU driver imports it. The guest owns cache maintenance on the non-coherent GPU, maps coherent memory types write-combined, and keeps the command ring in its own memory.</li>
+    <li><strong>GLES through ANGLE on Vulkan</strong>, so all guest rendering takes the Vulkan path.</li>
+    <li><strong>A display path with one GPU copy</strong> into a small ring of dma-buf scanout buffers, instead of one GPU copy and two CPU copies.</li>
+    <li><strong>Overhead removed where it was found:</strong> two busy loops in the VMM’s GPU device, a watchdog’s bookkeeping on the guest render thread, a doorbell after every ring write, and shader modules re-created every frame.</li>
+  </ul>
+  <p>The full design, the compatibility analysis and the optimisation method are in the companion article, <a href="../library/zero-copy-gpu-virtualisation.html">From virgl to zero-copy gfxstream</a>.</p>
+</section>
+
+<section>
+  <span class="label">Results</span>
+  <h2>On target, and on par with the previous stack</h2>
+  <div class="facts">
+    <div class="fact"><b>Function</b>Vulkan and GLES (through ANGLE) end to end on gfxstream, rendering in place in guest memory; display down from three copies to one GPU copy</div>
+    <div class="fact"><b>Overhead</b>Mean virtualisation loss within the customer’s target at every measured resolution</div>
+    <div class="fact"><b>Host CPU</b>Within target at idle and under the application benchmark</div>
+    <div class="fact"><b>Parity</b>Application benchmark on par with the previous stack, now with hardware Vulkan in the guest</div>
+    <div class="fact"><b>Drivers</b>Vulkan zero copy working on both the proprietary and the open-source host GPU driver</div>
+    <div class="fact"><b>Delivery</b>Patch series against the customer’s own trees; upstream backports keep their upstream authorship</div>
+  </div>
+  <div class="more"><a href="../library/zero-copy-gpu-virtualisation.html">Design article</a><a href="../#work">← Back to selected work</a></div>
+</section>
+
+</article></div></main>
+
+<footer><div class="wrap">
+  <span>© Lei Zhou</span>
+  <span>Written content CC BY 4.0 unless noted · cookie-free page counts via <a href="https://www.goatcounter.com/">GoatCounter</a> · <a href="../follow.html">Follow</a></span>
+</div></footer>
+<script data-goatcounter="https://zlhk100.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>

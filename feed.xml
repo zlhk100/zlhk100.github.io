@@ -5,9 +5,23 @@
   <link href="https://zlhk100.github.io/feed.xml" rel="self"/>
   <link href="https://zlhk100.github.io/"/>
   <id>https://zlhk100.github.io/</id>
-  <updated>2026-11-15T12:00:00-05:00</updated>
+  <updated>2026-11-15T18:00:00-05:00</updated>
   <author><name>Lei Zhou</name><uri>https://zlhk100.github.io/</uri></author>
   <rights>Written content CC BY 4.0 unless noted</rights>
+  <entry>
+    <title>From virgl to zero-copy gfxstream</title>
+    <link href="https://zlhk100.github.io/library/zero-copy-gpu-virtualisation.html"/>
+    <id>https://zlhk100.github.io/library/zero-copy-gpu-virtualisation.html</id>
+    <updated>2026-11-15T18:00:00-05:00</updated>
+    <summary>Moving an Android Automotive guest from virgl to gfxstream on an Arm SoC whose hypervisor cannot share host memory at runtime: three compatibility contracts, zero copy from guest memory, and per-frame attribution of virtualisation overhead.</summary>
+  </entry>
+  <entry>
+    <title>Case study: GPU virtualisation for a software-defined vehicle cockpit</title>
+    <link href="https://zlhk100.github.io/work/gpu-virtualisation-cockpit.html"/>
+    <id>https://zlhk100.github.io/work/gpu-virtualisation-cockpit.html</id>
+    <updated>2026-11-15T17:55:00-05:00</updated>
+    <summary>Moving an Android Automotive guest from virgl to gfxstream, with Vulkan, GLES through ANGLE and zero-copy rendering from guest memory, then optimising it to the customer’s performance targets.</summary>
+  </entry>
   <entry>
     <title>From chain of trust to chain of timing</title>
     <link href="https://zlhk100.github.io/library/chain-of-timing.html"/>

@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From virgl to zero-copy gfxstream — Lei Zhou</title>
+<meta name="description" content="Moving an Android Automotive guest from virgl to gfxstream on an Arm SoC whose hypervisor cannot share host memory at runtime: three compatibility contracts, zero copy from guest memory, and how the virtualisation overhead was found.">
+<meta name="author" content="Lei Zhou">
+<link rel="canonical" href="https://zlhk100.github.io/library/zero-copy-gpu-virtualisation.html">
+<link rel="alternate" type="application/atom+xml" title="Lei Zhou — updates" href="../feed.xml">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://zlhk100.github.io/library/zero-copy-gpu-virtualisation.html">
+<meta property="og:title" content="From virgl to zero-copy gfxstream">
+<meta property="og:description" content="Compatibility across release lines, zero-copy rendering from guest memory without runtime sharing, and per-frame attribution of virtualisation overhead.">
+<meta property="og:image" content="https://zlhk100.github.io/assets/og-zero-copy-gpu-virtualisation.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Card: From virgl to zero-copy gfxstream. Three contracts, guest-owned memory and the per-frame floor">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "TechArticle", "headline": "From virgl to zero-copy gfxstream", "author": {"@type": "Person", "name": "Lei Zhou", "url": "https://zlhk100.github.io/"}, "copyrightHolder": {"@type": "Person", "name": "Lei Zhou"}, "copyrightYear": 2026, "license": "https://creativecommons.org/licenses/by/4.0/", "about": ["gfxstream", "virtio-gpu", "Vulkan", "ANGLE", "zero copy", "GPU virtualisation", "automotive"], "datePublished": "2026-11-15", "url": "https://zlhk100.github.io/library/zero-copy-gpu-virtualisation.html", "dateModified": "2026-11-15"}
+</script>
+<style>
+:root{
+  --bg:#faf7f2; --bg2:#f3ede4; --bg3:#ede5d8; --border:#d6cab8;
+  --text:#3a2e22; --text-dim:#6f604c; --text-head:#1e1610;
+  --accent:#2E3192; --accent2:#B9431B; --accent3:#1F6F9E;
+  --navy:#2E3192; --orange:#F15A29; --sky:#37AFE4;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
+    --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
+    --accent:#9EA1F0; --accent2:#F4825F; --accent3:#62C4EE;
+    --navy:#9EA1F0; --orange:#F4825F; --sky:#62C4EE;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#16130f; --bg2:#1d1914; --bg3:#26211a; --border:#3b342a;
+  --text:#d9cfc1; --text-dim:#a39581; --text-head:#f3ece2;
+  --accent:#9EA1F0; --accent2:#F4825F; --accent3:#62C4EE;
+  --navy:#9EA1F0; --orange:#F4825F; --sky:#62C4EE;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16.5px;line-height:1.75}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius:2px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 48px}
+@media (max-width:700px){.wrap{padding:0 16px}}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:block}
+.top{border-bottom:1px solid var(--border);background:var(--bg2)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text-head);font-family:var(--serif);font-weight:700;font-size:18px}
+.brand:hover{text-decoration:none}
+.brand img{width:30px;height:30px;display:block}
+.top nav{display:flex;flex-wrap:wrap;gap:4px 22px;font-family:var(--mono);font-size:13px}
+.top nav a{color:var(--text-dim)}
+.top nav a:hover{color:var(--accent)}
+.hero{background:var(--bg2);border-bottom:1px solid var(--border);padding:56px 0 44px}
+.hero h1{font-family:var(--serif);font-weight:700;font-size:clamp(30px,4.6vw,46px);line-height:1.12;color:var(--text-head);margin:14px 0 0;max-width:24ch}
+.sub{font-size:clamp(17px,2vw,19px);font-weight:300;color:var(--text-head);margin:14px 0 0;max-width:60ch}
+.meta{font-family:var(--mono);font-size:12.5px;color:var(--text-dim);margin-top:14px;letter-spacing:.02em}
+article{max-width:760px;padding:24px 0 40px}
+article section{padding:28px 0 4px;border-bottom:1px solid var(--border)}
+article section:last-of-type{border-bottom:0}
+h2{font-family:var(--serif);font-weight:700;font-size:clamp(22px,2.6vw,27px);line-height:1.25;color:var(--text-head);margin:6px 0 14px}
+article p{margin:0 0 14px}
+article ul{margin:0 0 18px;padding-left:22px}
+article li{margin:0 0 8px}
+article li::marker{color:var(--accent)}
+strong{color:var(--text-head);font-weight:600}
+.callout{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--navy);border-radius:6px;padding:16px 20px;margin:4px 0 20px}
+.callout p{margin:0}
+.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:4px 0 22px}
+.fact{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:15px}
+.fact b{display:block;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent3);margin-bottom:4px}
+@media (max-width:640px){.facts{grid-template-columns:1fr}}
+.tm{overflow-x:auto;margin:4px 0 14px;border:1px solid var(--border);border-radius:6px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14.5px;line-height:1.55}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--border)}
+th{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent3);background:var(--bg2)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600;color:var(--text-head)}
+.more{margin:6px 0 18px;display:flex;flex-wrap:wrap;gap:6px 22px;font-family:var(--mono);font-size:13.5px;font-weight:600}
+.note{font-size:14px;color:var(--text-dim)}
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:28px 0;font-size:13.5px;color:var(--text-dim)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
+article h2{margin-top:6px}
+article code{font-family:var(--mono);font-size:.88em;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:0 4px}
+article em{font-style:italic}
+.tm table{min-width:520px}
+.tm td:first-child{font-weight:600}
+.attrib{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--sky);border-radius:6px;padding:16px 20px;margin:8px 0 20px;font-size:14.5px}
+.attrib p{margin:0 0 6px}.attrib p:last-child{margin:0}
+.discuss{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:20px 22px;margin:8px 0 24px}
+.discuss p{margin:0 0 12px}
+.discuss button{font-family:var(--mono);font-size:13.5px;font-weight:600;color:var(--accent);background:var(--bg);border:1px solid var(--accent);border-radius:4px;padding:8px 14px;cursor:pointer}
+.discuss button:hover{background:var(--bg3)}
+.discuss button:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+
+.toc{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:14px 20px 8px;margin:26px 0 6px;font-size:15px}
+.toc ol{margin:6px 0 8px;padding-left:22px;columns:2;column-gap:28px}
+.toc li{margin:0 0 4px;break-inside:avoid}
+@media (max-width:640px){.toc ol{columns:1}}
+.fig{margin:10px 0 24px}
+.figbox{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;overflow-x:auto}
+.fig figcaption{font-size:14px;line-height:1.6;color:var(--text-dim);margin-top:8px}
+.dg{display:block;width:100%;height:auto;color:var(--text);font-family:var(--sans)}
+.dg .bx{fill:var(--bg2);stroke:var(--border);stroke-width:1.2}
+.dg .bx2{fill:var(--bg3);stroke:var(--border);stroke-width:1.2}
+.dg .rgb{fill:var(--bg);stroke:var(--border);stroke-dasharray:3 3}
+.dg .rg{fill:none;stroke:var(--border);stroke-width:1.2;stroke-dasharray:5 4}
+.dg .hl{fill:var(--bg3);stroke:var(--accent3);stroke-width:1.5}
+.dg .sel{fill:var(--bg2);stroke:var(--orange);stroke-width:2}
+.dg .cell{fill:var(--bg);stroke:var(--border)}
+.dg .hd{fill:var(--bg3);stroke:var(--border)}
+.dg .act{fill:var(--bg3);stroke:var(--border)}
+.dg .note{fill:var(--bg2);stroke:var(--border);stroke-dasharray:4 3}
+.dg .pill{fill:var(--bg);stroke:var(--border)}
+.dg .life{stroke:var(--border);stroke-width:1.2;stroke-dasharray:3 4}
+.dg .sep{stroke:var(--border);stroke-width:1;stroke-dasharray:2 4}
+.dg text{dominant-baseline:auto}
+.dg .t{fill:var(--text-head);font-size:12px}
+.dg .th{fill:var(--text-head);font-size:12px;font-weight:600}
+.dg .ta,.dg .tn{fill:var(--text);font-size:11.5px}
+.dg .tp{fill:var(--text-dim);font-size:11px;font-family:var(--mono)}
+.dg .tm{fill:var(--text);font-size:10.5px;font-family:var(--mono)}
+.dg .tl{fill:var(--text-dim);font-size:11px}
+.dg .lt{fill:var(--text);font-size:11px}
+.dg .tt{fill:var(--accent);font-size:11px;font-family:var(--mono);font-weight:600;letter-spacing:.06em}
+.dg .ln{fill:none;stroke:currentColor;stroke-width:1.3}
+.dg .lo{fill:none;stroke:var(--orange);stroke-width:1.7}
+.dg .ld{fill:none;stroke:currentColor;stroke-width:1.2;stroke-dasharray:5 4}
+.dg .tx{fill:var(--orange);font-size:16px;font-weight:600}
+.dg .mk{fill:currentColor}.dg .mko{fill:var(--orange)}
+.refs{font-size:14.5px}.refs li{margin:0 0 6px}
+article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--text-head);margin:22px 0 10px}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="wrap">
+  <a class="brand" href="../"><img src="../assets/mark.svg" alt="" width="30" height="30">Lei Zhou</a>
+  <nav aria-label="Site">
+    <a href="../#work">Work</a><a href="../#research">Research</a><a href="../#library">Library</a><a href="../#talks">Talks</a><a href="../#contact">Contact</a>
+  </nav>
+</div></div>
+
+<header class="hero"><div class="wrap">
+  <span class="label">Library · Mixed-criticality and virtualisation</span>
+  <h1>From virgl to zero-copy gfxstream</h1>
+  <p class="sub">Compatibility, memory and overhead when a guest’s GPU path moves to gfxstream on a platform that cannot share host memory at runtime, worked through on an Android Automotive cockpit.</p>
+  <div class="meta">Lei Zhou · design article · 15 November 2026 · three parts, four diagrams · about 20 minutes</div>
+</div></header>
+
+<main><div class="wrap"><article>
+
+<div class="callout" style="margin-top:26px"><p><strong>About this article.</strong> It is drawn from a customer delivery I led as technical delivery lead and architect; the <a href="../work/gpu-virtualisation-cockpit.html">case study</a> covers the outcome.</p></div>
+
+<nav class="toc" aria-label="Contents">
+  <span class="label">Contents</span>
+  <ol>
+    <li><a href="#why">Why gfxstream, and what the platform withholds</a></li>
+    <li><a href="#contracts">The stack and its three contracts</a></li>
+    <li><a href="#abi">Contract A: the renderer interface</a></li>
+    <li><a href="#protocol">Contract B: the guest protocol</a></li>
+    <li><a href="#numbers">Contract C: numbers nobody owns</a></li>
+    <li><a href="#decision">The decision: one renderer, both contracts</a></li>
+    <li><a href="#honest">Keeping the boundaries honest</a></li>
+    <li><a href="#memory">Let the guest own the memory</a></li>
+    <li><a href="#context">One context for memory and commands</a></li>
+    <li><a href="#coherency">Coherency on a non-coherent GPU</a></li>
+    <li><a href="#angle">GLES through ANGLE, and driver quirks</a></li>
+    <li><a href="#display">Display: from three copies to one</a></li>
+    <li><a href="#loss">What a loss figure measures</a></li>
+    <li><a href="#idle">Idle cost first</a></li>
+    <li><a href="#floor">The per-frame floor</a></li>
+    <li><a href="#ledger">Overheads that were not the work</a></li>
+    <li><a href="#churn">Work repeated every frame</a></li>
+    <li><a href="#safely">Changing a protocol safely</a></li>
+    <li><a href="#risks">How the risks were managed</a></li>
+    <li><a href="#references">References</a></li>
+  </ol>
+</nav>
+
+<section>
+<span class="label">Part I · Migration and compatibility</span>
+<h2 id="why">1. Why gfxstream, and what the platform withholds</h2>
+<p>When virtual machines share one GPU, every frame a guest renders crosses the hypervisor boundary, so the design of that path decides how much performance the guest loses and how much CPU the host spends. With virgl, an Android guest gets GLES from the host and, on this platform, only software Vulkan. gfxstream works differently: guest-side encoders serialise the guest’s Vulkan and GLES calls, a renderer library on the host decodes them and replays them on the host’s Vulkan driver. The guest gets hardware Vulkan, and GLES can run on top of it.</p>
+<p>gfxstream as usually deployed also assumes something this platform does not give it. Its command ring, its host-visible Vulkan memory and its host-allocated buffers all rely on the host mapping its own memory into the guest at runtime. This hypervisor stack cannot do that. crosvm’s own source describes guest-handle memory as useful for zero copy on hypervisors designed around static allocation of guest memory, such as Xen, so the constraint is not unique to this platform. Venus, the other Vulkan path for virtio-gpu, relies on the same kind of mapping: Mesa’s documentation describes host-visible memory exported as a mappable dma-buf and mapped into the guest by the hypervisor. Changing protocol would not have avoided the problem.</p>
+<p>The root-cause fix is runtime host-to-guest sharing in the hypervisor stack. That was outside the delivery timeline, so it was recorded as the long-term recommendation, and everything in Part II is the design that works without it.</p>
+</section>
+
+<section>
+<h2 id="contracts">2. The stack and its three contracts</h2>
+<p>A gfxstream guest touches the host through more interfaces than the virtio-gpu device itself. Three of them decided the architecture.</p>
+<figure class="fig" id="fig-stack"><div class="figbox">
+<svg class="dg" viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" style="min-width:640px" role="img" aria-labelledby="f1t f1d">
+<title id="f1t">The gfxstream stack and its three contracts</title>
+<desc id="f1d">Guest column: apps and SurfaceFlinger, ANGLE, guest encoders and vulkan.ranchu, guest kernel virtio-gpu driver. Host column: VMM virtio-gpu device, rutabaga_gfx, gfxstream renderer, host Vulkan driver, GPU. Contract A sits between rutabaga_gfx and the renderer. Contract B joins the guest encoders to the renderer through the command ring. Contract C sits between the guest kernel and its users.</desc>
+<defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M0,0L10,5L0,10z"/></marker></defs>
+<rect class="rg" x="16" y="30" width="316" height="320" rx="8"/><text class="tt" x="30" y="52">ANDROID AUTOMOTIVE GUEST</text>
+<rect class="rg" x="388" y="30" width="316" height="370" rx="8"/><text class="tt" x="402" y="52">HOST</text>
+<rect class="bx" x="40" y="66" width="268" height="40" rx="5"/><text class="t" x="174" y="91" text-anchor="middle">Apps and SurfaceFlinger</text>
+<rect class="bx" x="40" y="128" width="268" height="40" rx="5"/><text class="t" x="174" y="153" text-anchor="middle">ANGLE · GLES on Vulkan</text>
+<rect class="hl" x="40" y="190" width="268" height="40" rx="5"/><text class="th" x="174" y="215" text-anchor="middle">Guest encoders · vulkan.ranchu</text>
+<rect class="bx" x="40" y="280" width="268" height="40" rx="5"/><text class="t" x="174" y="305" text-anchor="middle">Guest kernel · virtio-gpu driver</text>
+<rect class="bx" x="412" y="66" width="268" height="40" rx="5"/><text class="t" x="546" y="91" text-anchor="middle">VMM · virtio-gpu device</text>
+<rect class="bx" x="412" y="128" width="268" height="40" rx="5"/><text class="t" x="546" y="153" text-anchor="middle">rutabaga_gfx</text>
+<rect class="hl" x="412" y="210" width="268" height="40" rx="5"/><text class="th" x="546" y="235" text-anchor="middle">gfxstream renderer</text>
+<rect class="bx" x="412" y="272" width="268" height="40" rx="5"/><text class="t" x="546" y="297" text-anchor="middle">Host Vulkan driver</text>
+<rect class="bx2" x="412" y="334" width="268" height="40" rx="5"/><text class="t" x="546" y="359" text-anchor="middle">GPU</text>
+<path class="ln" d="M174 106V126" marker-end="url(#a1)"/><path class="ln" d="M174 168V188" marker-end="url(#a1)"/><path class="ln" d="M174 230V278" marker-end="url(#a1)"/>
+<path class="ln" d="M546 106V126" marker-end="url(#a1)"/><path class="ln" d="M546 168V208" marker-end="url(#a1)"/><path class="ln" d="M546 250V270" marker-end="url(#a1)"/><path class="ln" d="M546 312V332" marker-end="url(#a1)"/>
+<path class="ln" d="M308 296C350 296 360 86 410 86" marker-end="url(#a1)"/><text class="tl" x="312" y="318">virtqueues</text>
+<path class="lo" d="M308 210C360 210 360 230 410 230" stroke-dasharray="6 4" marker-end="url(#a1)"/>
+<circle cx="360" cy="220" r="11" fill="var(--bg)" stroke="var(--orange)" stroke-width="1.6"/><text class="tx" x="360" y="226" text-anchor="middle">B</text>
+<circle cx="700" cy="189" r="11" fill="var(--bg)" stroke="var(--orange)" stroke-width="1.6"/><text class="tx" x="700" y="195" text-anchor="middle">A</text>
+<path class="lo" d="M680 189H560"/>
+<circle cx="30" cy="255" r="11" fill="var(--bg)" stroke="var(--orange)" stroke-width="1.6"/><text class="tx" x="30" y="261" text-anchor="middle">C</text>
+<path class="lo" d="M41 255H172"/>
+<text class="tl" x="30" y="374">A: renderer C interface the VMM calls</text>
+<text class="tl" x="30" y="390">B: protocol the guest encoders speak to the renderer</text>
+<text class="tl" x="30" y="406">C: feature bits and parameter ids, guest kernel ↔ its users</text>
+</svg></div>
+<figcaption><strong>Figure 1.</strong> The gfxstream stack on this platform. The VMM’s graphics layer, rutabaga_gfx, uses the gfxstream renderer as a library. In the final design, contract B rides a command ring in guest memory, not the virtqueues.</figcaption></figure>
+<ul>
+<li><strong>Contract A</strong> is the renderer’s C interface: the entry points, structs, parameter keys and flags that rutabaga_gfx calls.</li>
+<li><strong>Contract B</strong> is the protocol between the guest encoders and the renderer’s decoders: opcode tables, the transport handshake and the capability structs the guest reads.</li>
+<li><strong>Contract C</strong> is the numbering that lets guest userspace discover what the kernel and the device support: virtio-gpu feature bits and DRM parameter ids.</li>
+</ul>
+<p>Each contract has a different owner and a different release cadence. The guest’s Android release was fixed here: it was the customer’s functioning production guest, built from an older AOSP release. The VMM was written for a newer renderer. A mismatch on any of the three would have stopped the migration.</p>
+</section>
+
+<section>
+<h2 id="abi">3. Contract A: the renderer interface</h2>
+<p>The renderer interface was renamed as gfxstream evolved. Earlier renderer sources, from the project once called Vulkan Cereal, export most of the virtio-gpu interface as <code>pipe_virgl_renderer_*</code>; later releases export <code>stream_renderer_*</code>, which is what rutabaga_gfx binds. The renderer that matched the older guest came from the earlier line.</p>
+<p>The first step was to compare the VMM’s rutabaga_gfx binding, entry point by entry point and with every parameter key and flag, against the earliest release that has the newer interface. Most matched. The binding also expected items that release did not offer in its stable interface, such as the renderer-features parameter key and the snapshot entry points.</p>
+<p>A compatibility adapter in the VMM was designed for the older renderer, under rules written before any code:</p>
+<ul>
+<li>contained behind one interface and selected explicitly for older renderers;</li>
+<li>no feature logic inside it;</li>
+<li>independent of the host GPU driver;</li>
+<li>specified by a field-by-field map, with a contract test at every milestone gate.</li>
+</ul>
+<p>Then the question changed. If a newer renderer could also serve the older guest, no adapter would be needed. Several later renderer releases were checked against the VMM: every entry point it binds present, and every struct identical in layout on the 64-bit Arm target. Argument layouts were not compared statically; the first runtime milestone was the proof for them. The newest releases were set aside, because they add capability fields, treat one pipe type as fatal and renumber handle types.</p>
+</section>
+
+<section>
+<h2 id="protocol">4. Contract B: the guest protocol</h2>
+<p>A renderer that the VMM can load is useless if it cannot decode what the guest sends. The older guest’s encoders and the newer renderer come from different release lines, so the protocol was compared from source as well:</p>
+<ul>
+<li><strong>GLES and the render-control channel:</strong> the opcode tables were identical.</li>
+<li><strong>Transport:</strong> the pipe handshake was equivalent to the original pairing.</li>
+<li><strong>Vulkan:</strong> there was a set of calls the newer renderer cannot decode, all of which the older encoder could in principle send.</li>
+</ul>
+<p>The Vulkan gap turned out to be unreachable. The guest’s Android extension allowlists are a subset of the features the renderer supports, so the guest never advertises, and never sends, what the renderer lacks. That was established from the AOSP sources, not by testing until nothing failed.</p>
+<p>Two differences were real, and neither needed a change in the guest:</p>
+<ul>
+<li><strong>A struct that differs by one field.</strong> The guest and renderer versions of one capability struct have the same size and agree on their first fields. One field the guest reads lies in what is padding on the host, so it always reads zero. It is harmless here only because every reader of that field takes the guest-handle branch, which this design always takes.</li>
+<li><strong>A program-binary gap.</strong> The older encoder drops its program state after <code>glProgramBinary</code>, so the UI’s cached shader binaries drew black. The renderer now reports zero program-binary formats. Skia clears its program-binary support when that count is zero, and then ignores cached binaries, which repairs both new and already-affected caches.</li>
+</ul>
+</section>
+
+<section>
+<h2 id="numbers">5. Contract C: numbers nobody owns</h2>
+<p>The guest discovers guest-handle support in two places: a virtio-gpu feature bit offered by the device, and a DRM parameter that the kernel answers. Neither number is standardised:</p>
+<ul>
+<li><strong>The feature bit.</strong> The OASIS virtio 1.3 specification defines virtio-gpu feature bits 0 to 4, ending with context initialisation. The guest-handle bit is left to the VMM: crosvm, for example, defines a <code>CREATE_GUEST_HANDLE</code> bit of its own, outside that range and not in the specification.</li>
+<li><strong>The parameter id.</strong> Android userspace defines parameter 8 as guest-handle support, for example in minigbm’s copy of the virtio-gpu uapi header. Upstream Linux assigned 8 to a different parameter, the context debug name, in 2023, and never added a guest-handle parameter.</li>
+</ul>
+<p>So a guest kernel that offers guest handles cannot follow upstream Linux for that id and also serve its own userspace. It has to agree with the VMM on the bit and with userspace on the id. The fix therefore belongs in the guest kernel’s uapi header, declared as an explicit divergence from upstream for that id, rather than in each userspace project. The rule generalises: when out-of-spec extensions number the same thing, find the component that deviates from the contract its consumers use, and fix it there once.</p>
+</section>
+
+<section>
+<h2 id="decision">6. The decision: one renderer, both contracts</h2>
+<p>The decision was to keep the production guest on its release, changing only its graphics libraries and kernel where the design required it, so that the change surface, and with it the maintenance and upstreaming effort, stayed small; and to host a newer renderer release that satisfies contract A natively and contract B for everything the guest can reach. The adapter stayed documented as the fallback.</p>
+<div class="tm"><table>
+<thead><tr><th>Option</th><th>Why not chosen</th></tr></thead>
+<tbody>
+<tr><td>Older renderer with an adapter in the VMM</td><td>Feasible, but puts a second renderer interface into the VMM for as long as older guests ship. Kept as the fallback.</td></tr>
+<tr><td>Move the guest to the newer AOSP release</td><td>Its parameter ids disagree with the guest kernel, so zero copy would be off without a kernel change; transports are forced and modules are missing; it moves the whole guest to a new Android release, with the BSP bring-up work that brings; and it has the same program-binary gap.</td></tr>
+<tr><td>The newest renderer releases</td><td>Extra capability fields, a pipe type treated as fatal, and renumbered handle types.</td></tr>
+</tbody></table></div>
+<p>The decision record also named what would re-open it: a reachable protocol defect that cannot be fixed in the renderer, Vulkan first light failing on protocol, or the customer moving to a newer AOSP release. A decision with no re-open condition tends to outlive the facts it rested on.</p>
+</section>
+
+<section>
+<h2 id="honest">7. Keeping the boundaries honest</h2>
+<p>A compatibility decision is only as good as the discipline that follows it. Five practices held the boundaries in place for the rest of the work.</p>
+<ul>
+<li><strong>Generated code is regenerated, never hand-edited.</strong> The guest’s checked-in generated encoder files had been assembled by porting individual upstream changes, not produced by one generator run. Before adding entries, the generator was pinned to an upstream revision verified to reproduce the affected file byte for byte; its output was then carried into the guest tree, with the few lines where that tree differs documented.</li>
+<li><strong>Shared structs grow the owner’s way.</strong> A new feature field is appended after the last field, as upstream grows the struct, not dropped into padding.</li>
+<li><strong>Libraries that share a struct ship together.</strong> Appending a field to a guest feature struct changed a second guest library’s copy of it. The two libraries are one ABI unit and are delivered as a pair.</li>
+<li><strong>Mixed-version cells.</strong> The change that spanned guest and host was tested as new guest with old host and old guest with new host, as well as both new (Section 18).</li>
+<li><strong>Not every failure is a mismatch.</strong> A crash under the application benchmark looked like a protocol problem. It was a handle table that re-issued live indices once very many handles were alive, and the fix was a backport of an upstream change. The same discipline applied later to a file-descriptor leak on the gfxstream path only: the guest’s GLES layer keeps each present fence until its status changes, and the older guest’s fence-status path never reports the change. A one-property switch confirmed the cause, and a backport of the upstream change fixed it.</li>
+</ul>
+<p>New interfaces, such as the display copy entry point in Section 12, were written in upstream shape from the start, so that they stay submittable upstream rather than becoming a fork.</p>
+</section>
+
+<section>
+<span class="label">Part II · Zero copy without runtime sharing</span>
+<h2 id="memory">8. Let the guest own the memory</h2>
+<p>If the host cannot map its memory into the guest, the direction has to reverse: the guest allocates, and the host GPU reads and writes the guest’s pages in place.</p>
+<figure class="fig" id="fig-memory"><div class="figbox">
+<svg class="dg" viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" style="min-width:640px" role="img" aria-labelledby="f2t f2d">
+<title id="f2t">Host-allocated versus guest-handle memory</title>
+<desc id="f2d">Left: the usual model, where the host allocates GPU memory and maps it into the guest at runtime; this hypervisor stack cannot do the mapping. Right: the guest-handle model, where the guest allocates pages, the VMM exports them as a udmabuf, and the host GPU driver imports that dma-buf.</desc>
+<defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M0,0L10,5L0,10z"/></marker><marker id="a2o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mko" d="M0,0L10,5L0,10z"/></marker></defs>
+<text class="tt" x="20" y="24">USUAL MODEL · HOST ALLOCATES</text>
+<rect class="rgb" x="20" y="36" width="320" height="200" rx="8"/>
+<rect class="bx" x="40" y="56" width="130" height="40" rx="5"/><text class="t" x="105" y="81" text-anchor="middle">Guest mapping</text>
+<rect class="bx" x="190" y="176" width="130" height="40" rx="5"/><text class="t" x="255" y="201" text-anchor="middle">Host GPU memory</text>
+<path class="ld" d="M255 174V76H172" marker-end="url(#a2)"/>
+<text class="tl" x="247" y="124" text-anchor="end">runtime map into guest</text>
+<circle cx="255" cy="146" r="9" fill="var(--bg)"/><text class="tx" x="255" y="152" text-anchor="middle">✕</text><text class="tl" x="243" y="150" text-anchor="end">not available here</text>
+<text class="tt" x="380" y="24">GUEST-HANDLE MODEL · GUEST ALLOCATES</text>
+<rect class="rgb" x="380" y="36" width="320" height="200" rx="8"/>
+<rect class="hl" x="400" y="56" width="130" height="40" rx="5"/><text class="th" x="465" y="81" text-anchor="middle">Guest pages</text>
+<rect class="bx" x="550" y="56" width="130" height="40" rx="5"/><text class="t" x="615" y="76" text-anchor="middle">VMM</text><text class="tp" x="615" y="90" text-anchor="middle">udmabuf over pages</text>
+<rect class="bx" x="550" y="136" width="130" height="40" rx="5"/><text class="t" x="615" y="156" text-anchor="middle">Host GPU driver</text><text class="tp" x="615" y="170" text-anchor="middle">dma-buf import</text>
+<rect class="bx2" x="550" y="196" width="130" height="30" rx="5"/><text class="t" x="615" y="216" text-anchor="middle">GPU</text>
+<path class="lo" d="M530 76H548" marker-end="url(#a2o)"/><path class="lo" d="M615 96V134" marker-end="url(#a2o)"/><path class="ln" d="M615 176V194" marker-end="url(#a2)"/>
+<path class="ln" d="M550 211C470 211 465 150 465 98" marker-end="url(#a2)"/><text class="tl" x="400" y="190">reads and writes</text><text class="tl" x="400" y="204">the same pages</text>
+</svg></div>
+<figcaption><strong>Figure 2.</strong> Reversing the direction of sharing. No page is copied and no host memory is mapped into the guest.</figcaption></figure>
+<p>The mechanism exists in the ecosystem as a <em>guest-handle</em> blob: a virtio-gpu blob resource backed by guest memory, offered by the VMM behind a feature bit. When the guest creates one, the VMM builds a udmabuf over the guest’s pages and passes the file descriptor to the renderer, which imports it into the host Vulkan driver as external memory. The host GPU then renders directly into guest memory.</p>
+<p>One platform detail mattered: the Linux udmabuf driver’s default limits on the number of pages in a list and on buffer size are too small for GPU allocations, so they are raised before the VMM starts.</p>
+</section>
+
+<section>
+<h2 id="context">9. One context for memory and commands</h2>
+<p>The original plan put Vulkan on gfxstream’s pipe transport. A source read before that step was built showed that it cannot work with guest-handle memory.</p>
+<figure class="fig" id="fig-context"><div class="figbox">
+<svg class="dg" viewBox="0 0 720 230" xmlns="http://www.w3.org/2000/svg" style="min-width:640px" role="img" aria-labelledby="f3t f3d">
+<title id="f3t">Why the pipe transport loses guest-handle allocations</title>
+<desc id="f3d">Pipe transport: the guest-handle blob is created on the virtio-gpu device context, but the Vulkan allocation that uses it is decoded on the pipe's context, so the renderer's lookup by context and blob id fails. ASG transport with the ring in guest memory: blob and command stream share one context, so the lookup succeeds.</desc>
+<text class="tt" x="20" y="24">PIPE TRANSPORT</text>
+<rect class="rgb" x="20" y="36" width="320" height="180" rx="8"/>
+<rect class="bx" x="40" y="56" width="130" height="44" rx="5"/><text class="t" x="105" y="76" text-anchor="middle">Blob created</text><text class="tp" x="105" y="91" text-anchor="middle">on context 1</text>
+<rect class="bx" x="190" y="56" width="130" height="44" rx="5"/><text class="t" x="255" y="76" text-anchor="middle">Allocation decoded</text><text class="tp" x="255" y="91" text-anchor="middle">on context 2</text>
+<rect class="sel" x="70" y="140" width="220" height="44" rx="5"/><text class="t" x="180" y="160" text-anchor="middle">Renderer looks up (context 2, id)</text><text class="tp" x="180" y="175" text-anchor="middle">not found</text>
+<path class="ln" d="M255 100V138"/><path class="ld" d="M105 100V138"/>
+<text class="tt" x="380" y="24">ASG · RING IN GUEST MEMORY</text>
+<rect class="rgb" x="380" y="36" width="320" height="180" rx="8"/>
+<rect class="hl" x="400" y="56" width="280" height="44" rx="5"/><text class="th" x="540" y="76" text-anchor="middle">Blob and command stream</text><text class="tp" x="540" y="91" text-anchor="middle">on one context</text>
+<rect class="bx" x="430" y="140" width="220" height="44" rx="5"/><text class="t" x="540" y="160" text-anchor="middle">Renderer looks up (context, id)</text><text class="tp" x="540" y="175" text-anchor="middle">found</text>
+<path class="ln" d="M540 100V138"/>
+</svg></div>
+<figcaption><strong>Figure 3.</strong> The renderer keys guest-handle blobs by context and id. Only a transport that keeps memory and commands on one context can find them.</figcaption></figure>
+<p>On the pipe transport, the guest-handle blob is created on the virtio-gpu device’s context, while <code>vkAllocateMemory</code> that uses it is decoded on the pipe’s context. The renderer keys blobs by context and id, so the lookup fails. Creating blobs per thread instead does not work either: there is one host pipe per context, so streams cannot be combined, and a blob on a thread’s descriptor lives as long as the thread, while Vulkan memory belongs to the whole process.</p>
+<p>gfxstream’s own design for Vulkan is address-space graphics (ASG): a single command ring per process. Its ring normally lives in host memory, which is the mapping this platform lacks, so the ring moved into guest memory as a guest-handle blob of its own. Two consequences followed:</p>
+<ul>
+<li>the per-process ring always uses the Vulkan capability set, because a process that starts with GLES would otherwise keep empty Vulkan capabilities for later use;</li>
+<li>for this step, the guest encoders and the renderer changed; the VMM and the virtio-gpu device did not.</li>
+</ul>
+<p>On the board, the guest-handle allocation and its Vulkan stream then shared one context. Data was correct on both coherent and non-coherent memory types, a Vulkan conformance subset ran without failures, and the guest never created a host-allocated blob or asked to map one.</p>
+</section>
+
+<section>
+<h2 id="coherency">10. Coherency on a non-coherent GPU</h2>
+<p>When stage 2 maps guest RAM as normal write-back memory, the guest’s own page tables decide cacheability. The guest maps its blobs cacheable; the GPU is not coherent with the CPU caches. Without maintenance, data was wrong in both directions in every iteration of a coherency test.</p>
+<p>The rule chosen is that maintenance stays with the owner of the cache lines, which is the guest:</p>
+<ul>
+<li><strong>Before the GPU reads,</strong> the guest cleans the range (<code>DC CVAC</code>) in <code>vkFlushMappedMemoryRanges</code>. <strong>After the GPU writes,</strong> it cleans and invalidates (<code>DC CIVAC</code>) in <code>vkInvalidateMappedMemoryRanges</code>. Both directions then had no mismatches. On this platform they run from guest user space without trapping, so no system call is needed.</li>
+<li><strong>At creation,</strong> the guest kernel zeroes a blob’s pages through its cacheable linear map. Those dirty zero lines could later be written back over GPU output, so the kernel cleans the pages once before the blob reaches the host.</li>
+<li><strong>Coherent memory types</strong> are mapped write-combined in the guest. The request travels as a blob flag that only the guest kernel sees: it accepts the flag for guest-memory blobs only and clears it before sending the command, so the host contract is unchanged.</li>
+<li><strong>The renderer skips host flush and invalidate</strong> on memory it never mapped. Forwarding them would break a Vulkan valid-usage rule, and the guest owns those lines anyway.</li>
+</ul>
+<p>The alternative, cache maintenance through dma-buf sync calls on the host, gave correct results in a test. It was rejected because it crosses ownership, and its invalidate can discard guest lines that the guest has not yet cleaned.</p>
+</section>
+
+<section>
+<h2 id="angle">11. GLES through ANGLE, and driver quirks</h2>
+<p>With Vulkan working, GLES moved onto it through ANGLE in the guest. A renderer feature for guests that use ANGLE makes colour buffers Vulkan-only, and the renderer then runs no host GL emulation at all. The first attempt without it showed a blank panel: SurfaceFlinger composed into hardware-buffer images whose Vulkan writes never reached the colour buffer’s readers. With the feature on, Android’s UI, SurfaceFlinger and apps render through ANGLE, <code>vulkan.ranchu</code> and gfxstream, and ANGLE provides GLES 3.2.</p>
+<p>Where the host driver behaved differently from what the renderer expected, the adjustment went into the renderer, not the driver. Where upstream gfxstream had already fixed the same problem, the fix was a backport with upstream authorship kept, rather than a new patch.</p>
+<p>Guest-handle Vulkan zero copy also works on the open-source host driver, so the design does not depend on one vendor’s driver.</p>
+</section>
+
+<section>
+<h2 id="display">12. Display: from three copies to one</h2>
+<p>Under virgl, a scanout resource has a buffer behind it that the host compositor can show. Under gfxstream it has none, only a read-back. The first working display read each frame back with the CPU, which cost one GPU copy and two CPU copies.</p>
+<p>The delivered path gives each scanout a ring of three dma-buf buffers created through udmabuf, imported once by the host compositor, and fills the next slot with one GPU copy, through a new renderer entry point that copies a colour buffer into a dma-buf. The pitch matches the renderer’s fixed stride and was checked against the display controller’s constraints, so no third copy is needed. Both CPU copies are gone.</p>
+<p>The one GPU copy is kept by design: the guest’s own Vulkan image, not the colour buffer, decides the layout, and the guest asks for the GPU’s optimal tiling rather than a layout the display controller can scan directly. The copy converts that tiled image into the linear dma-buf the display scans out, in a single pass on the GPU.</p>
+</section>
+
+<section>
+<span class="label">Part III · Finding the overhead</span>
+<h2 id="loss">13. What a loss figure measures</h2>
+<p>The contract set a target for virtualisation loss but defined no method for measuring it, so a measurement contract was written to define one. The method rests on these rules:</p>
+<ul>
+<li><strong>State the claim type first.</strong> An overhead ratio, an absolute score, an optimisation verdict and a mechanism each need a different statistic and sample unit.</li>
+<li><strong>Same code on both sides.</strong> A loss is meaningful only from one benchmark source built for the host and for the guest, with the same scenes and settings. A guest-only application has no denominator.</li>
+<li><strong>Offscreen.</strong> Presenting runs are capped by vsync and mix display cost into the ratio.</li>
+<li><strong>Declare the aggregate.</strong> The loss from the benchmark’s composite score and the mean of per-scene losses differ noticeably, because the composite weights high-frame-rate scenes more. Report per scene, and state the aggregate next to the figure.</li>
+<li><strong>Score runs carry no instruments.</strong> Profilers and probes are used in separate attribution runs, whose own cost is measured.</li>
+</ul>
+</section>
+
+<section>
+<h2 id="idle">14. Idle cost first</h2>
+<p>One cost had nothing to do with rendering, and showed even at idle. Two busy loops in the VMM’s GPU device kept host cores busy at all times, whichever renderer was in use: an event that was never cleared, and a timed wait whose deadline had always already passed. The fixes changed a dozen lines. They also improved the existing virgl stack, which is a reminder that a before-and-after comparison is only fair when both arms carry the same fixes.</p>
+</section>
+
+<section>
+<h2 id="floor">15. The per-frame floor</h2>
+<p>The first contract-shaped measurement showed the pattern clearly. Scenes bound by GPU work lost little, so the render path itself, zero-copy memory included, added little. The loss sat in very light scenes running at thousands of frames per second.</p>
+<figure class="fig" id="fig-floor"><div class="figbox">
+<svg class="dg" viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" style="min-width:640px" role="img" aria-labelledby="f4t f4d">
+<title id="f4t">The per-frame floor model</title>
+<desc id="f4d">Illustration, not measured data. For each scene, guest frame time is approximately the larger of the host frame time and a fixed per-frame floor. Light scenes, whose host frame time is below the floor, are lifted to the floor and lose most; heavy scenes are above it and lose almost nothing.</desc>
+<line class="ln" x1="70" y1="210" x2="690" y2="210"/><line class="ln" x1="70" y1="30" x2="70" y2="210"/>
+<text class="tl" x="20" y="34">frame</text><text class="tl" x="20" y="48">time</text>
+<line class="lo" x1="70" y1="140" x2="690" y2="140" stroke-dasharray="6 4"/><text class="tl" x="78" y="132">per-frame floor</text>
+<rect class="bx" x="100" y="185" width="40" height="25"/><rect class="rg" x="146" y="140" width="40" height="70"/>
+<rect class="bx" x="240" y="165" width="40" height="45"/><rect class="rg" x="286" y="140" width="40" height="70"/>
+<rect class="bx" x="380" y="120" width="40" height="90"/><rect class="rg" x="426" y="118" width="40" height="92"/>
+<rect class="bx" x="520" y="60" width="40" height="150"/><rect class="rg" x="566" y="58" width="40" height="152"/>
+<text class="tl" x="143" y="228" text-anchor="middle">light scene</text><text class="tl" x="283" y="228" text-anchor="middle">light scene</text><text class="tl" x="423" y="228" text-anchor="middle">GPU-bound</text><text class="tl" x="563" y="228" text-anchor="middle">GPU-bound</text>
+<rect class="bx" x="90" y="20" width="14" height="12"/><text class="tl" x="110" y="31">host-native</text>
+<rect class="rg" x="200" y="20" width="14" height="12"/><text class="tl" x="220" y="31">guest ≈ max(host, floor)</text>
+<text class="tp" x="690" y="246" text-anchor="end">Illustration, not measured data</text>
+</svg></div>
+<figcaption><strong>Figure 4.</strong> A fixed cost per frame in the guest-to-host command path lifts light scenes to a floor and leaves GPU-bound scenes almost untouched.</figcaption></figure>
+<p>The model is simple: guest frame time is roughly the larger of the host frame time and a fixed per-frame floor. Fitted across scenes and resolutions, the floor explained the light-scene losses. More usefully, it predicts: once a change lowers the floor, the model projects the aggregate loss before the next contract measurement, and that projection is written down before the measurement is taken. Its first projection matched the measurement. A model that predicts is still not a mechanism, so the floor was then decomposed per frame (Section 16).</p>
+</section>
+
+<section>
+<h2 id="ledger">16. Overheads that were not the work</h2>
+<p>For the lightest scene, which only clears the screen, the frame time was decomposed into components measured per frame, with a residual row. The ledger closed. It showed the frame bound by the guest’s render thread, and two guest-side costs that were not part of rendering took over half of it:</p>
+<ul>
+<li><strong>A watchdog’s bookkeeping</strong> on the render thread, in the guest’s graphics support library.  It is switched off in the guest build, a change confined to that one library, after checking that every call site tolerates its absence.</li>
+<li><strong>A doorbell after every ring write.</strong> The guest notified the host after each write, whether or not the host was waiting.</li>
+</ul>
+<p>The doorbell could not simply be dropped on the guest side. The host renderer goes to sleep without re-checking the ring, so a guest that skips a notification at the wrong moment strands a command, and the guest hangs. The safe change has two halves: the host re-checks the ring before it sleeps, and the guest rings only when the host says it is about to sleep. Because it changes behaviour on both sides, it is negotiated as a new host feature (Section 18).</p>
+<p>Each change named, in advance, a counter that had to move if its theory was right. For the doorbell, guest notifications had to fall to about the number of host sleep transitions. They fell by orders of magnitude and equalled the host’s wake-ups, counted at both ends. Before the change the two counts had never matched, because the host’s wake channel was bounded and dropped notifications silently when full. Counting only the producer would have hidden that.</p>
+</section>
+
+<section>
+<h2 id="churn">17. Work repeated every frame</h2>
+<p>The application benchmark’s GPU section lagged the previous stack. The obvious reading was that the new transport was slower. That reading changes too many variables at once: the previous stack reaches the GPU through a native GLES driver, while the new one goes through ANGLE on Vulkan.</p>
+<p>The ledger for the slow sub-test showed the guest render thread spending much of each frame on shader modules and pipelines that ANGLE created and destroyed every frame, each through a synchronous round trip to the host, where the driver compiled them again. Tracing showed the cause: the application’s separable program pipeline was re-linked inside ANGLE at draw time, destroying the modules and pipelines that the next draw then recreated. Every module re-created each frame repeated one of a small number of distinct SPIR-V blobs, and no layer between ANGLE and the driver de-duplicated them.</p>
+<p>The fix sits in the guest encoder: shader modules are de-duplicated by SPIR-V content, so a repeated create is served from a guest-side cache that shares one host module. De-duplicating below ANGLE removes the repeated work whatever triggers the re-link, which made it the more robust choice than changing ANGLE itself.</p>
+</section>
+
+<section>
+<h2 id="safely">18. Changing a protocol safely</h2>
+<p>The doorbell change alters behaviour on both sides of contract B, so it was treated as a protocol change:</p>
+<ul>
+<li><strong>Negotiated.</strong> The guest suppresses notifications only if the host advertises the new feature, under a name of its own, so that it cannot collide with a future upstream feature. The guest records it in a field appended to its feature struct (Section 7).</li>
+<li><strong>Arms.</strong> The kept build as control, the candidate, both mixed-version cells, and a rollback to the known set.</li>
+<li><strong>Targeted stress.</strong> Lost wake-ups are rare per iteration and almost never appear in benchmark runs, so a purpose-built hang hunt aimed at the transition window ran in every cell: several independent producers and consumers, seeded random idle gaps, transfers large enough to reach every changed path, a timeout on every wait and a wall-clock limit on the run. Its first version used invalid API input and was rejected before use. The final one used valid input only, checked by a validator with a negative control, and the host’s count of data found on the re-check showed that the window was reached.</li>
+<li><strong>Decision rule first.</strong> A shift counts only if it exceeds the wider run-to-run range of either arm, with at least three runs per arm. The doorbell change was kept with every candidate run above every control run.</li>
+</ul>
+</section>
+
+<section>
+<h2 id="risks">19. How the risks were managed</h2>
+<p>The design choices above were also risk decisions. Each major risk had a named mitigation before work depended on it:</p>
+<div class="tm"><table>
+<thead><tr><th>Risk</th><th>How it was managed</th></tr></thead>
+<tbody>
+<tr><td>No renderer serves both the production guest and the VMM</td><td>Contracts A and B compared from source before anything was built; a compatibility adapter designed and held as the fallback; re-open conditions written into the decision (Sections 3–6).</td></tr>
+<tr><td>The platform cannot share host memory with the guest</td><td>Direction reversed to guest-owned memory; runtime sharing recorded as the long-term fix (Sections 1, 8).</td></tr>
+<tr><td>The biggest unknowns surface last</td><td>Feasibility questions such as coherency, decode coverage and the memory budget were run early, alongside the critical path; the whole functional chain was proven before any optimisation, one variable per step.</td></tr>
+<tr><td>A protocol change hangs the guest in the field</td><td>Feature negotiation, mixed-version cells and a targeted hang hunt before the change was kept (Section 18).</td></tr>
+<tr><td>An optimisation that only appears to help</td><td>A predicted counter per theory, decision rules before the data, and score runs without instruments (Sections 13–17).</td></tr>
+</tbody></table></div>
+<p>Items that did not help close with a verdict too. Pinning the GPU worker threads to the big cores made results worse, so it was not kept and the scheduler’s default placement stays. A file-descriptor leak was localised by a differential arm before any tracing: zero growth per frame on virgl, steady growth on gfxstream, under the same applications, which pointed straight at the gfxstream path (Section 7).</p>
+<p>The general lessons are the ones that cost the most to learn. Compatibility across release lines is a question to answer from source, boundary by boundary, before anything is built. When the platform withholds a mechanism, reverse the direction rather than emulate it. And an overhead is found only by a ledger that sums to the frame, a counter predicted in advance, and a rule written before the data.</p>
+</section>
+
+<section>
+<h2 id="references">20. References</h2>
+<ol class="refs">
+<li>AOSP, <a href="https://android.googlesource.com/platform/hardware/google/gfxstream/">gfxstream</a> (guest encoders and host renderer, later releases) and <a href="https://android.googlesource.com/device/generic/goldfish-opengl/">goldfish-opengl</a> (guest encoders, earlier releases).</li>
+<li>crosvm, <a href="https://crosvm.dev/book/appendix/rutabaga_gfx.html">Rutabaga virtual graphics interface</a> and the <a href="https://crosvm.dev/doc/rutabaga_gfx/gfxstream/index.html">rutabaga_gfx gfxstream module</a>; QEMU, <a href="https://github.com/qemu/qemu/blob/master/docs/system/devices/virtio-gpu.rst">virtio-gpu</a> (its rutabaga device).</li>
+<li>OASIS, <a href="https://docs.oasis-open.org/virtio/virtio/v1.3/virtio-v1.3.html">Virtual I/O Device (VIRTIO) Version 1.3</a>, section 5.7 GPU device.</li>
+<li>Linux kernel, <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/dma-buf/udmabuf.c">drivers/dma-buf/udmabuf.c</a> and <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/drm/virtgpu_drm.h">include/uapi/drm/virtgpu_drm.h</a>.</li>
+<li>Khronos, <a href="https://docs.vulkan.org/refpages/latest/refpages/source/VkMappedMemoryRange.html">VkMappedMemoryRange</a> (VUID-VkMappedMemoryRange-memory-00684: memory must be currently host mapped).</li>
+<li>Google, <a href="https://chromium.googlesource.com/angle/angle">ANGLE</a>.</li>
+<li>Arm, <a href="https://developer.arm.com/documentation/ddi0487/latest">Arm Architecture Reference Manual for A-profile</a> (data cache maintenance by virtual address).</li>
+<li><a href="https://github.com/vkmark/vkmark">vkmark</a>, the Vulkan benchmark used on both sides.</li>
+<li>Mesa, <a href="https://docs.mesa3d.org/drivers/venus.html">Virtio-GPU Venus</a> (host-visible memory mapped into the guest).</li>
+<li>crosvm, <a href="https://crosvm.dev/doc/src/devices/virtio/device_constants.rs.html">virtio device constants</a> (virtio-gpu feature bits, including the guest-handle bit).</li>
+<li>AOSP minigbm, <a href="https://android.googlesource.com/platform/external/minigbm/+/refs/heads/main/external/virtgpu_drm.h">external/virtgpu_drm.h</a> (guest-handle parameter and blob flag); dri-devel, <a href="https://lists.freedesktop.org/archives/dri-devel/2023-October/427288.html">drm/uapi: add explicit virtgpu context debug name</a> (upstream parameter 8).</li>
+<li>AOSP, <a href="https://android.googlesource.com/device/generic/vulkan-cereal/+/6402a1b3/stream-servers/virtio-gpu-gfxstream-renderer.cpp">vulkan-cereal, virtio-gpu-gfxstream-renderer.cpp</a> (the renderer's earlier repository and its <code>pipe_virgl_renderer_*</code> interface).</li>
+<li>Skia, <a href="https://skia.googlesource.com/skia/+/main/src/gpu/ganesh/gl/GrGLCaps.cpp">GrGLCaps.cpp</a> (program-binary support cleared when no formats are reported).</li>
+<li>dri-devel, <a href="https://lists.freedesktop.org/archives/dri-devel/2021-June/310938.html">udmabuf: configurable list_limit and size_limit_mb</a>.</li>
+<li>Android, <a href="https://source.android.com/docs/devices/cuttlefish/gpu">Cuttlefish: GPU graphics acceleration</a> (gfxstream and virgl modes).</li>
+</ol>
+</section>
+
+<section id="source">
+  <span class="label">Source and licence</span>
+  <h2>About this article</h2>
+  <div class="attrib">
+    <p>Written by Lei Zhou. Text and diagrams © 2026 Lei Zhou, licensed <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</p>
+    <p>Upstream behaviour described here reflects the sources linked above as of November 2026; the design, method and results are the author’s own.</p>
+  </div>
+  <div class="more"><a href="../work/gpu-virtualisation-cockpit.html">Case study</a><a href="virtio-hypervisors.html">VirtIO and hypervisors</a><a href="mixed-criticality-primer.html">Mixed-criticality on shared silicon</a><a href="../follow.html">Follow updates</a></div>
+</section>
+
+<section id="discuss">
+  <span class="label">Discussion</span>
+  <h2>Corrections, questions or counter-examples?</h2>
+  <div class="discuss">
+    <p>If a claim here is wrong or out of date, I would like to hear about it. Comments are hosted in GitHub Discussions and need a GitHub account. Nothing loads from a third party until you click.</p>
+    <button type="button" id="load-discussion">Load the discussion</button>
+    <div id="giscus-slot"></div>
+  </div>
+  <div class="more"><a href="../#library">← Back to the library</a></div>
+</section>
+
+</article></div></main>
+
+<footer><div class="wrap">
+  <span>© Lei Zhou · written content CC BY 4.0</span>
+  <span>Cookie-free page counts via <a href="https://www.goatcounter.com/">GoatCounter</a> · <a href="../follow.html">Follow</a></span>
+</div></footer>
+
+<script>
+/* Giscus loads only on request. Fill in GISCUS_REPO_ID and GISCUS_CATEGORY_ID from giscus.app. */
+(function(){
+  var GISCUS_REPO_ID = "";      // e.g. "R_kgDO..."
+  var GISCUS_CATEGORY_ID = "";  // e.g. "DIC_kwDO..."
+  var btn = document.getElementById('load-discussion');
+  var slot = document.getElementById('giscus-slot');
+  if (!GISCUS_REPO_ID || !GISCUS_CATEGORY_ID) {
+    btn.remove();
+    slot.innerHTML = '<p>Discussion opens soon. Meanwhile, email <a href="mailto:zlhk100@gmail.com">zlhk100@gmail.com</a> or open an issue on the <a href="https://github.com/zlhk100/zlhk100.github.io/issues">site repository</a>.</p>';
+    return;
+  }
+  btn.addEventListener('click', function(){
+    var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var s = document.createElement('script');
+    s.src = 'https://giscus.app/client.js';
+    var a = {'data-repo':'zlhk100/zlhk100.github.io','data-repo-id':GISCUS_REPO_ID,
+      'data-category':'Library','data-category-id':GISCUS_CATEGORY_ID,
+      'data-mapping':'pathname','data-strict':'1','data-reactions-enabled':'1',
+      'data-emit-metadata':'0','data-input-position':'top','data-lang':'en','data-loading':'lazy',
+      'data-theme': dark ? 'dark_dimmed' : 'light','crossorigin':'anonymous'};
+    for (var k in a) s.setAttribute(k, a[k]);
+    s.async = true;
+    slot.appendChild(s);
+    btn.remove();
+  });
+})();
+</script>
+<script data-goatcounter="https://zlhk100.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>

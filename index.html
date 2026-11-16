@@ -251,7 +251,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
       <div class="pname">Mixed-criticality and virtualisation</div>
       <ul>
         <li>Conceived and led the real-time benchmark behind Linaro’s first <span class="nb">Tier-1</span> automotive win</li>
-        <li>Optimised a virtio-gpu graphics pipeline, meeting the customer’s virtualisation overhead target and reaching parity with the incumbent stack</li>
+        <li>Optimised a virtio-gpu graphics pipeline to within the customer’s virtualisation-overhead target, at parity with the previous stack</li>
         <li>Delivered industrial telemetry for national critical infrastructure, fail-operational over diverse redundant channels</li>
         <li>Published <a href="https://github.com/zlhk100/physical-ai-mixed-criticality">MCIB</a>, an open interference-benchmark specification; first measurement campaign planned</li>
       </ul>
@@ -311,8 +311,9 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   <p class="group"><span class="promise">Predictable</span><span class="pname">Mixed-criticality and virtualisation</span></p>
   <div class="item">
     <h3>GPU virtualisation for a software-defined vehicle cockpit</h3>
-    <div class="meta">Linaro · tech lead</div>
-    <p>A safety-relevant instrument cluster and an Android Automotive infotainment guest sharing one Arm SoC and one GPU under a type-1 hypervisor. Led the guest graphics move to gfxstream (Vulkan, GLES via ANGLE, zero-copy rendering over VirtIO-GPU) and benchmark-led optimisation. Met the customer’s virtualisation-overhead target and reached parity with the incumbent stack, and supervised the GPU-arbitration track that keeps the instrument cluster free from interference.</p>
+    <div class="meta">Linaro · technical delivery lead and architect</div>
+    <p>A safety-relevant instrument cluster and an Android Automotive infotainment guest sharing one Arm SoC and one GPU under a type-1 hypervisor. Architected and led the guest graphics move from virgl to gfxstream (Vulkan, GLES via ANGLE, zero-copy rendering from guest memory over VirtIO-GPU), then the benchmark-led optimisation. Kept virtualisation loss within the customer’s target and reached parity with the previous stack.</p>
+    <div class="more"><a href="work/gpu-virtualisation-cockpit.html">Case study</a><a href="library/zero-copy-gpu-virtualisation.html">Design article</a></div>
   </div>
   <div class="item">
     <h3>Worst-case latency benchmark and outlier attribution for real-time Linux</h3>
@@ -394,6 +395,11 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
       <h3>VirtIO and hypervisors</h3>
       <p>How virtual devices work: virtqueues and notifications, vhost and vDPA, Xen grants, QNX, L4Re and Gunyah, VFIO, and protected guests, with diagrams and sequences.</p>
       <span class="go">Read the reference</span>
+    </a>
+    <a class="entry" href="library/zero-copy-gpu-virtualisation.html">
+      <h3>From virgl to zero-copy gfxstream</h3>
+      <p>Three compatibility contracts across release lines, zero copy from guest memory when the hypervisor cannot share host memory, and how virtualisation overhead was found frame by frame.</p>
+      <span class="go">Read the article</span>
     </a>
     <a class="entry" href="https://zlhk100.github.io/hw-security-safety-isolation/article/">
       <h3>Security and Safety by Isolation</h3>
