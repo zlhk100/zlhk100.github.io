@@ -166,7 +166,7 @@ article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var
 
 <main><div class="wrap"><article>
 
-<div class="callout" style="margin-top:26px"><p><strong>Status.</strong> This is an argument and a set of proposals, not a results paper. Statements about existing standards, products and research are referenced. Proposals are labelled as proposals. MCIB, the Mixed-Criticality Interference Benchmark, is an open-source benchmark I maintain for attributing interference between AI inference and real-time control on shared silicon; it is described in section 8 and has not yet produced measurements.</p></div>
+<div class="callout" style="margin-top:26px"><p><strong>Status.</strong> This is an argument and a set of proposals, not a results paper. Statements about existing standards, products and research are referenced. Proposals are labelled as proposals. HopBound is an open-source project I maintain for per-hop timing evidence on shared platforms; it is described in section 8 and has not yet produced measurements. Updated 16 November 2026: sections 5, 7 and 8 now refer to HopBound, which succeeds the earlier MCIB benchmark.</p></div>
 
 <nav class="toc" aria-label="Contents">
   <span class="label">Contents</span>
@@ -178,7 +178,7 @@ article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var
     <li><a href="#hops">Where the chain of timing breaks today</a></li>
     <li><a href="#robotics">The trust chain has gaps too</a></li>
     <li><a href="#close">What would close it</a></li>
-    <li><a href="#mcib">Where MCIB fits</a></li>
+    <li><a href="#hopbound">Where HopBound fits</a></li>
     <li><a href="#open">Open problems</a></li>
     <li><a href="#references">References</a></li>
   </ol>
@@ -237,17 +237,17 @@ article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var
 
 <section>
 <h2 id="hops">5. Where the chain of timing breaks today</h2>
-<p>Following a sensor sample through a consolidated platform, hop by hop, shows where timing is enforced, where it is only detected, and where nothing bounds it by design. The last column gives the nearest layer in MCIB's interference-channel taxonomy, which classifies where contention arises (operating system, hypervisor, cache, memory, interconnect and others, with an accelerator layer proposed): the hop says <em>where</em> time is lost, the layer says <em>why</em>.</p>
+<p>Following a sensor sample through a consolidated platform, hop by hop, shows where timing is enforced, where it is only detected, and where nothing bounds it by design. The last column names the layer where the contention arises: the hop says <em>where</em> time is lost, the layer says <em>why</em>.</p>
 <div class="tm"><table>
-<thead><tr><th>Hop</th><th>What exists</th><th>Status</th><th>MCIB layer</th></tr></thead>
+<thead><tr><th>Hop</th><th>What exists</th><th>Status</th><th>Where contention arises</th></tr></thead>
 <tbody>
-<tr><td>Field network</td><td>TSN: IEEE 802.1AS shared time and 802.1Qbv time-aware gates</td><td>Enforced, when configured</td><td>Outside the SoC; not in MCIB's scope</td></tr>
-<tr><td>Device-virtualisation backend</td><td>The VIRTIO specification defines no deadlines or delivery-time bounds for requests; timing appears only as device data, such as clock readings from the RTC device. On Linux, vhost worker threads run in the normal time-sharing class unless configured otherwise. Real-time prototypes exist for ACRN and Jailhouse.</td><td>Not bounded by design</td><td><code>sw.hypervisor</code></td></tr>
-<tr><td>Hypervisor dispatch</td><td>vCPU wait time and VM-exit handling add to every path; static partitioning with dedicated cores removes the vCPU scheduling wait</td><td>Bounded only by configuration</td><td><code>sw.hypervisor</code></td></tr>
-<tr><td>Shared memory hierarchy</td><td>Cache and bandwidth contention sit below what the hypervisor can see. Arm MPAM and cache colouring can partition them, but MPAM details are in many respects implementation-defined.</td><td>Partially enforceable</td><td><code>hw.cache</code>, <code>hw.mem</code>, <code>hw.interconnect</code></td></tr>
-<tr><td>Middleware</td><td>DDS deadline and liveliness QoS notify both sides when a stream misses its expected interval or goes silent</td><td>Detected, not enforced</td><td>Nearest: <code>sw.runtime</code></td></tr>
-<tr><td>Executor</td><td>The default ROS 2 scheduling is not aware of chain criticality; research schedulers such as PiCAS add chain priority and analysable bounds</td><td>Not bounded by default</td><td><code>sw.os</code>, <code>sw.runtime</code></td></tr>
-<tr><td>Accelerator</td><td>Many accelerators offer limited or no preemption, so a long job can hold the engine; research frameworks such as PAAM schedule accelerator requests by chain priority</td><td>Not bounded by default</td><td><code>hw.accel</code> (proposed in MCIB spec v1.4)</td></tr>
+<tr><td>Field network</td><td>TSN: IEEE 802.1AS shared time and 802.1Qbv time-aware gates</td><td>Enforced, when configured</td><td>Outside the SoC</td></tr>
+<tr><td>Device-virtualisation backend</td><td>The VIRTIO specification defines no deadlines or delivery-time bounds for requests; timing appears only as device data, such as clock readings from the RTC device. On Linux, vhost worker threads run in the normal time-sharing class unless configured otherwise. Real-time prototypes exist for ACRN and Jailhouse.</td><td>Not bounded by design</td><td>Hypervisor and device backend</td></tr>
+<tr><td>Hypervisor dispatch</td><td>vCPU wait time and VM-exit handling add to every path; static partitioning with dedicated cores removes the vCPU scheduling wait</td><td>Bounded only by configuration</td><td>Hypervisor scheduling</td></tr>
+<tr><td>Shared memory hierarchy</td><td>Cache and bandwidth contention sit below what the hypervisor can see. Arm MPAM and cache colouring can partition them, but MPAM details are in many respects implementation-defined.</td><td>Partially enforceable</td><td>Cache, memory, interconnect</td></tr>
+<tr><td>Middleware</td><td>DDS deadline and liveliness QoS notify both sides when a stream misses its expected interval or goes silent</td><td>Detected, not enforced</td><td>Middleware</td></tr>
+<tr><td>Executor</td><td>The default ROS 2 scheduling is not aware of chain criticality; research schedulers such as PiCAS add chain priority and analysable bounds</td><td>Not bounded by default</td><td>Operating system and middleware scheduling</td></tr>
+<tr><td>Accelerator</td><td>Many accelerators offer limited or no preemption, so a long job can hold the engine; research frameworks such as PAAM schedule accelerator requests by chain priority</td><td>Not bounded by default</td><td>Accelerator</td></tr>
 </tbody></table></div>
 <p>Three observations follow.</p>
 <ul>
@@ -271,7 +271,7 @@ article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var
 <p>All of the following are proposals.</p>
 <h3 class="h3">Five building blocks</h3>
 <ul>
-<li><strong>Declared timing contracts.</strong> Each workload and each hop declares its demand and its bound in machine-readable form: memory footprint, bandwidth envelope, burst profile, worst-case latency split into floor and tail. Automotive software already has a machine-readable form for timing inside AUTOSAR models: the Timing Extensions describe event chains with latency and age constraints. What is missing is the same kind of contract for the hops outside that model, such as virtualised devices, middleware and accelerators. MCIB's specification defines one candidate format as its Timing Manifest profile, with contracts derived from measurement and validated by replay, and per-device-class contracts for virtualised device paths.</li>
+<li><strong>Declared timing contracts.</strong> Each workload and each hop declares its demand and its bound in machine-readable form: memory footprint, bandwidth envelope, burst profile, worst-case latency split into floor and tail. Automotive software already has a machine-readable form for timing inside AUTOSAR models: the Timing Extensions describe event chains with latency and age constraints. What is missing is the same kind of contract for the hops outside that model, such as virtualised devices, middleware and accelerators. HopBound's specification outlines one candidate: a timing contract per hop, stating its needs, its promise and its sensitivity to each shared resource, derived from measurement.</li>
 <li><strong>Enforcement at the source.</strong> Every declared budget is backed by a mechanism that limits the aggressor, not by the victim's hope: bandwidth regulation and cache partitioning, time-aware gates, accelerator arbitration with priority and bounded preemption.</li>
 <li><strong>Composable boundaries.</strong> LET-style windows at hop boundaries, so that end-to-end latency is a sum of fixed windows that can be analysed in advance, rather than a property discovered by measurement.</li>
 <li><strong>Attest the lock.</strong> The configuration that bounds interference is locked at boot, then measured and reported the way firmware is. This reuses machinery that already exists: SPDM already defines measurement types for hardware configuration and firmware configuration as well as for code (<a href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0274_1.1.0b.pdf">DSP0274 1.1</a>, section 7.10.1.1). It is integrity evidence that the intended configuration is in force. It is not, on its own, evidence that deadlines are met.</li>
@@ -290,10 +290,10 @@ article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var
 </section>
 
 <section>
-<h2 id="mcib">8. Where MCIB fits</h2>
-<p><a href="https://github.com/zlhk100/physical-ai-mixed-criticality">MCIB</a>, the Mixed-Criticality Interference Benchmark, is the evidence side of the timing chain. Its loop is profile → attribute → countermeasure, and each attributed outlier ends in a verdict: <code>tune</code> (configuration removes it), <code>partition</code> (a named isolation mechanism bounds it) or <code>ceiling</code> (a structural limit to design around). In the terms of this paper, attribution tells you which hop broke its contract and why, and the verdict tells you whether that hop's contract can be enforced at all.</p>
-<p>Its method fits the third shared requirement in section 2, evidence that does not come from the system being judged: it measures the victim, toggles the aggressor and attributes the difference, using hardware counters as corroboration where the silicon exposes them.</p>
-<p>Its current state is stated plainly in its repository. It has produced no measurements yet; its harness has been validated on a Raspberry Pi 4B under PREEMPT_RT; the specification, taxonomy and results schema are published; the first campaign is planned on Renesas R-Car V4H, and an accelerator time-sharing campaign is in outline. Its output is structured interference characterisation data that a qualified assessor may use as input to a safety argument. It is not qualified safety evidence.</p>
+<h2 id="hopbound">8. Where HopBound fits</h2>
+<p><a href="https://github.com/hopbound/hopbound">HopBound</a> is the evidence side of the timing chain. Its loop is profile → attribute → control → verify, applied the same way to bare-metal RTOS, virtualised, on-chip AMP and off-chip AMP deployments. Each attributed outlier ends in a control verdict: <code>configure</code> (a configuration change removes it), <code>isolate</code> (a named spatial or temporal isolation mechanism bounds it) or <code>limit</code> (a structural limit to design around or contain). In the terms of this paper, attribution tells you which hop broke its contract and why, and the verdict tells you whether that hop's contract can be enforced at all.</p>
+<p>Its method fits the third shared requirement in section 2, evidence that does not come from the system being judged. Each hop declares how much of it can be observed: its own execution, the platform around it, or only its boundaries. Where the inside is visible, tracing shows the mechanism; in every case, measuring the hop with and without the competing workload establishes the cause, with hardware counters as corroboration where the silicon exposes them.</p>
+<p>Its current state is stated plainly in its repository. It started in November 2026, its specification is an outline, and it has produced no measurements yet; its first campaign, a perception chain from camera to inference to consumer, is planned. Its output is characterisation data that can be an input to a safety argument made and assessed by others. It is not qualified safety evidence.</p>
 </section>
 
 <section>
@@ -323,7 +323,7 @@ article h3,.h3{font-family:var(--serif);font-weight:700;font-size:20px;color:var
 <li>H. Choi, Y. Xiang and H. Kim, <a href="https://par.nsf.gov/servlets/purl/10276465">PiCAS: priority-driven chain-aware scheduling for ROS 2</a>, RTAS 2021; <a href="https://intra.ece.ucr.edu/~hyoseung/pdf/RTAS_2024_PAAM-CR_slides.pdf">PAAM: priority-driven accelerator access management</a>, RTAS 2024.</li>
 <li>MIPI Alliance, <a href="https://embeddedcomputing.com/application/automotive/vehicle-networking/new-camera-security-framework-addresses-security-requirements-for-automotive-and-other-embedded-applications">New camera security framework for automotive and other embedded applications</a>; <a href="https://mipi.org/articles/camera-security-framework-addresses-regulatory-requirements">Camera Security Framework addresses regulatory requirements</a>; <a href="https://www.edge-ai-vision.com/?p=56797">What's new in MIPI security: CCISE</a>; Synopsys, <a href="https://www.synopsys.com/articles/securing-camera-data-mipi-cse2.html">MIPI CSE 2.0 security solution</a>.</li>
 <li>ROS 2 design, <a href="https://design.ros2.org/articles/ros2_dds_security.html">ROS 2 DDS-Security integration</a>; <a href="https://arxiv.org/pdf/2609.08280">Seeing is not believing: breaking the physical-to-digital trust boundary in robotics</a> (2026); <a href="https://arxiv.org/pdf/1904.09179">Credential masquerading and OpenSSL Spy: exploring ROS 2 using DDS security</a> (2019).</li>
-<li>MCIB, <a href="https://github.com/zlhk100/physical-ai-mixed-criticality">repository and specification</a>.</li>
+<li>HopBound, <a href="https://github.com/hopbound/hopbound">repository and specification</a>.</li>
 </ol>
 </section>
 
