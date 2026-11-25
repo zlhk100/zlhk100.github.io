@@ -5,9 +5,23 @@
   <link href="https://zlhk100.github.io/feed.xml" rel="self"/>
   <link href="https://zlhk100.github.io/"/>
   <id>https://zlhk100.github.io/</id>
-  <updated>2026-11-15T18:00:00-05:00</updated>
+  <updated>2026-11-25T16:00:00-05:00</updated>
   <author><name>Lei Zhou</name><uri>https://zlhk100.github.io/</uri></author>
   <rights>Written content CC BY 4.0 unless noted</rights>
+  <entry>
+    <title>Not the Agent’s Word: Checking What an AI Agent Says It Did Against What the Platform Saw</title>
+    <link href="https://github.com/zlhk100/anchorstamp/blob/main/docs/whitepaper/Not_the_Agents_Word_Lei_Zhou_2026-11-25.pdf"/>
+    <id>https://github.com/zlhk100/anchorstamp/blob/main/docs/whitepaper/Not_the_Agents_Word_Lei_Zhou_2026-11-25.pdf</id>
+    <updated>2026-11-25T16:00:00-05:00</updated>
+    <summary>Whitepaper on anchorstamp (18 pages, PDF). An AI agent’s record of what it did is written by the agent; anchorstamp checks it against an observer the agent cannot reach, a Linux kernel module whose records are anchored in a TPM. Results from one laptop, and every limit with the control that would close it.</summary>
+  </entry>
+  <entry>
+    <title>The Agent Was Never the Recorder (Below the API, Part 2)</title>
+    <link href="https://medium.com/@zlhk100/the-agent-was-never-the-recorder-ce987d703ece"/>
+    <id>https://medium.com/@zlhk100/the-agent-was-never-the-recorder-ce987d703ece</id>
+    <updated>2026-11-25T15:55:00-05:00</updated>
+    <summary>Part 1 ended at a runtime that refuses to record. This part takes the recording obligation away from the agent: claim, observe, join, verdict, and what one laptop showed. On Medium.</summary>
+  </entry>
   <entry>
     <title>From virgl to zero-copy gfxstream</title>
     <link href="https://zlhk100.github.io/library/zero-copy-gpu-virtualisation.html"/>
