@@ -371,9 +371,9 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 2
   </div>
   <div class="item">
     <h3>anchorstamp: attested execution evidence for AI agents</h3>
-    <p>Checks what an AI agent claims it did against what an independent observer on the platform recorded, using signed, hash-chained records. The Linux kernel-audit proof of concept detects forged claims and unreported actions across 11 live scenarios.</p>
-    <div class="tags"><span class="tag">Rust</span><span class="tag">MIT / Apache-2.0</span><span class="tag">Spec part 1 published</span></div>
-    <div class="more"><a href="https://github.com/zlhk100/anchorstamp">GitHub repository</a><a href="https://medium.com/@zlhk100/the-agent-you-cant-audit-why-agentic-ai-needs-a-hardware-root-e4187b07ba9e">The Agent You Can’t Audit</a></div>
+    <p>An AI agent’s record of what it did is written by the agent. anchorstamp checks that record against an observer the agent cannot reach. Each claim gets a verdict (corroborated, contradicted, or nothing to compare), and every action that no claim accounts for is listed. The reference observer is a Linux kernel module whose records are anchored in a TPM. On one laptop, it contradicted forged claims and listed commands the agent never reported. It covers process executions only so far.</p>
+    <div class="tags"><span class="tag">Rust</span><span class="tag">Linux kernel</span><span class="tag">TPM 2.0</span><span class="tag">MIT / Apache-2.0</span><span class="tag">CC BY 4.0</span></div>
+    <div class="more"><a href="https://github.com/zlhk100/anchorstamp/blob/main/docs/whitepaper/Not_the_Agents_Word_Lei_Zhou_2026-11-25.pdf">Whitepaper (PDF)</a><a href="https://github.com/zlhk100/anchorstamp">GitHub repository</a><a href="https://github.com/zlhk100/anchorstamp/blob/main/docs/why-anchorstamp.md">Why it exists</a><a href="https://medium.com/@zlhk100/the-agent-you-cant-audit-why-agentic-ai-needs-a-hardware-root-e4187b07ba9e">The Agent You Can’t Audit</a></div>
   </div>
 </div></section>
 
